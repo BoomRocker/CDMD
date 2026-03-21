@@ -39,6 +39,7 @@
 			box-shadow: 0 0 30px rgba(0,0,0,0.9);
 		}
 		
+		
         body { 
             background-color: #000;
 			background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('assets/bg.jpg'); 
@@ -47,6 +48,24 @@
             display: flex; height: 100vh; overflow: hidden;
             position: fixed; width: 100%;
         }
+		
+		html, body {
+			background-color: #000000 !important;
+			margin: 0;
+			padding: 0;
+			height: 100%;
+			overflow: hidden;
+			/* This tells Safari the background color for the 'over-scroll' area */
+			position: fixed; 
+			width: 100%;
+		}
+
+		/* 2. Adjust your footer to sit ABOVE the bar, not behind it */
+		#footerControls {
+			/* env(safe-area-inset-bottom) is the secret iPad variable */
+			bottom: calc(10px + env(safe-area-inset-bottom)) !important;
+			padding-bottom: 5px;
+		}
 		
 		@keyframes stage-flash {
 			0% { filter: brightness(3); transform: scale(1.02); }
