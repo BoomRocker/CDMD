@@ -226,6 +226,25 @@
 		.symbol-btn { 
 			background: linear-gradient(#642800, #3d1a00) !important; 
 		}
+		
+		/* Change this: */
+#previewCard.rules-zoom {
+    width: 90vw !important;
+    height: 90vh !important;
+    background-size: contain !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+}
+
+/* To this: */
+.rules-zoom {
+    width: 90vw;
+    height: 90vh;
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-color: #111; /* Adds a dark backing for the rules page */
+}
     </style>
 </head>
 <body onload="initApp()">
@@ -508,7 +527,55 @@
             el.style.backgroundSize = "410% 210%"; el.style.backgroundPosition = `${card.x}% ${card.y}%`;
         }
 
-        function zoom(el, type) {
+// --- FIX 1: MAIN ZOOM (BOSS/SCENARIO) ---
+function zoom(el, type) {
+    if (el.style.backgroundImage.includes('mythoscardback.jpg')) return;
+    vibrate();
+    const p = document.getElementById('previewOverlay'); 
+    const card = document.getElementById('previewCard');
+    
+    // FORCE RESET FOR IPAD: Remove the 'rules-zoom' class
+    card.className = ""; 
+    card.style.cssText = ""; 
+    
+    const bgUrl = el.style.backgroundImage.slice(5, -2);
+    card.style.backgroundImage = `url('${bgUrl}')`;
+    card.style.backgroundPosition = el.style.backgroundPosition;
+
+    if (type === 'boss') { 
+        card.style.width = "100vh"; card.style.height = "85vh"; 
+        card.style.backgroundSize = "100% 400%"; 
+    } 
+    else if (type === 'fit') { 
+        card.style.width = "90vw"; card.style.height = "60vw"; 
+        card.style.backgroundSize = "100% 100%"; 
+    } 
+    else { 
+        card.style.height = "85vh"; card.style.width = "58vh"; 
+        card.style.backgroundSize = "410% 210%"; 
+    }
+    p.style.display = 'flex';
+}
+
+// --- FIX 2: HISTORY BAR ZOOM ---
+function showHistoryZoom(idx) {
+    const c = drawnHistory[idx]; vibrate();
+    const p = document.getElementById('previewOverlay'); 
+    const card = document.getElementById('previewCard');
+
+    // FORCE RESET FOR IPAD
+    card.className = ""; 
+    card.style.cssText = ""; 
+
+    const url = c.type === 'boss' ? currentBossMythosUrl : currentScenarioMythosUrl;
+    card.style.backgroundImage = `url('${url}')`;
+    card.style.backgroundPosition = `${c.x}% ${c.y}%`;
+    card.style.backgroundSize = "410% 210%"; 
+    card.style.height = "85vh"; card.style.width = "58vh";
+    p.style.display = 'flex';
+}
+
+/*        function zoom(el, type) {
             if (el.style.backgroundImage.includes('mythoscardback.jpg')) return;
             vibrate();
             const p = document.getElementById('previewOverlay'); const card = document.getElementById('previewCard');
@@ -530,6 +597,7 @@
             card.style.backgroundSize = "410% 210%"; card.style.height = "85vh"; card.style.width = "58vh";
             p.style.display = 'flex';
         }
+		*/
 
         function cycleSymbolCount() {
             vibrate(); new Audio('assets/symbol.mp3').play().catch(() => {});
