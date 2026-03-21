@@ -66,11 +66,14 @@
         #versionTag {
             color: var(--accent); font-family: 'MedievalSharp'; font-size: 0.9em;
             text-shadow: 2px 2px 4px black; opacity: 0.8;
+			color:#8b7355;
         }
 
         #menuToggle {
             width: 55px; height: 55px; border-radius: 50%;
-            background: rgba(45, 77, 63, 0.9); border: 2px solid #8b7355;
+            background: rgba(45, 77, 63, 0.9);
+			background: linear-gradient(#546e7a, #263238) !important;
+			border: 2px solid #8b7355;
             color: white; cursor: pointer; display: flex; align-items: center; justify-content: center;
             backdrop-filter: blur(5px); box-shadow: 0 4px 15px rgba(0,0,0,0.6);
         }
@@ -340,7 +343,7 @@
 
         let currentBossMythosUrl = "", currentScenarioMythosUrl = "";
         let deck = [], drawnHistory = [], currentStageIdx = 0, symbolCounter = 0;
-        let verX = 0, verY = 0;
+        let verX = 1, verY = 1;
 
         function vibrate() { if (window.navigator.vibrate) window.navigator.vibrate(20); }
         
