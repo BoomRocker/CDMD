@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CDMD: Tactical Grid</title>
+    <link href="https://fonts.googleapis.com/css2?family=Caudex:ital,wght@0,400;0,700;1,400;1,700&family=MedievalSharp&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    
+    <style>
+        body { 
+            background: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), url('assets/bg.jpg');
+            background-color: #0a0a0a; background-size: cover; background-position: center; background-attachment: fixed;
+            color: #e0e0e0; font-family: 'Caudex', serif; margin: 0; padding: 0; 
+            display: flex; min-height: 100vh; overflow-x: hidden;
+        }
+        
+        /* SIDEBAR */
+        .sidebar-left { 
+            width: 260px; background: rgba(20, 20, 20, 0.95); border-right: 3px solid #444;
+            display: flex; flex-direction: column; padding: 15px 10px; gap: 20px;
+            backdrop-filter: blur(10px); z-index: 1000; height: 100vh; position: sticky; top: 0;
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden;
+        }
+        .sidebar-left.collapsed { width: 60px; padding: 15px 5px; }
+
+        .nav-header { display: flex; align-items: center; gap: 10px; width: 100%; }
+        .menu-btn { width: 48px !important; flex-shrink: 0; background: #333 !important; }
+        .setup-row { display: flex; align-items: center; gap: 8px; flex-grow: 1; }
+
+        .sidebar-left.collapsed .hp-tracker-widget, 
+        .sidebar-left.collapsed select, 
+        .sidebar-left.collapsed .label,
+        .sidebar-left.collapsed .setup-row { display: none; }
+
+        select {
+            width: 100%; height: 42px; background: #1a1a1a; color: #ffcf67; border: 2px solid #444;
+            border-radius: 6px; padding: 0 10px; font-family: 'Caudex', serif; font-size: 1em;
+            cursor: pointer; outline: none; transition: border-color 0.3s; appearance: none;
+            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20fill%3D%22%23ffcf67%22%20d%3D%22M7%2010l5%205%205-5z%22%2F%3E%3C%2Fsvg%3E");
+            background-repeat: no-repeat; background-position: right 10px center;
+        }
+        select:focus { border-color: #ffcf67; }
+
+        #mainContainer { display: none; padding: 20px; flex-grow: 1; gap: 25px; justify-content: center; }
+        #mainContainer.active { display: flex; }
+
+        .game-grid { display: grid; grid-template-columns: auto auto; gap: 20px; }
+        .sidebar-right { width: 280px; display: flex; flex-direction: column; align-items: center; gap: 10px; border-left: 1px solid rgba(255,255,255,0.1); padding-left: 20px; }
+        .column { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+
+        .label { 
+            font-family: 'MedievalSharp', cursive; font-weight: bold; font-size: 1.1em; text-transform: uppercase; letter-spacing: 1px;
+            background: linear-gradient(to bottom, #ffcf67 0%, #d32f2f 60%, #8b0000 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0px 2px 2px rgba(0,0,0,0.9));
+            text-align: center; white-space: nowrap;
+        }
+
+        .viewport { 
+            position: relative; border: 3px solid #444; border-radius: 15px; background-color: rgba(0,0,0,0.8); 
+            background-repeat: no-repeat; background-position: center; 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.6); cursor: zoom-in;
+        }
+        .boss-card { width: 400px; height: 350px; background-size: 100% 400%; }
+        .minion-card { width: 400px; height: 350px; background-size: 100% 100%; }
+        .scenario-card { width: 550px; height: 350px; background-size: 100% 100%; }
+        
+        .mythos-card { 
+            width: 240px; height: 375px; background-size: 400% 200%; 
+            transition: box-shadow 0.5s ease, border-color 0.5s ease;
+        }
+        .mythos-card.danger-glow {
+            border-color: #ff0000;
+            box-shadow: 0 0 25px rgba(255, 0, 0, 0.8), inset 0 0 15px rgba(255, 0, 0, 0.4);
+        }
+
+        #mythosOverlaySymbol {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: url('assets/symbol.png') no-repeat center;
+            background-size: 80%; pointer-events: none; opacity: 0; transition: opacity 0.5s ease;
+            filter: drop-shadow(0 0 15px red); z-index: 5;
+        }
+        #mythosOverlaySymbol.visible { opacity: 1; }
+
+        button { 
+            position: relative; height: 48px; cursor: pointer; border-radius: 6px; font-weight: 700; color: #e0e0e0; 
+            font-family: 'MedievalSharp', cursive;
+            background: linear-gradient(to bottom, #2d4d3f 0%, #1a3d2f 50%, #122b21 100%);
+            border: 2px solid #8b7355; box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
+            transition: transform 0.05s, filter 0.3s; width: 100%; display: flex; align-items: center; justify-content: center;
+        }
+        button::before, button::after {
+            content: ''; position: absolute; width: 4px; height: 4px; background: #8b7355; 
+            border-radius: 50%; box-shadow: 0 0 2px black;
+        }
+        button::before { top: 4px; left: 4px; }
+        button::after { bottom: 4px; right: 4px; }
+        button.alt-btn { background: linear-gradient(to bottom, #6d4c41 0%, #4e342e 50%, #3e2723 100%); }
+        
+        button.symbol-btn { 
+            background: linear-gradient(to bottom, rgba(160, 64, 0, 0.8) 0%, rgba(100, 40, 0, 0.9) 50%, rgba(60, 20, 0, 0.95) 100%); 
+            border-color: #a04000;
+        }
+        .btn-icon-img { height: 28px; width: 28px; object-fit: contain; filter: drop-shadow(0 0 2px black); }
+
+        button:disabled { filter: grayscale(1); opacity: 0.5; cursor: not-allowed; }
+
+        .hp-tracker-widget {
+            background: #000; border: 2px solid #222; border-radius: 20px; padding: 20px 10px;
+            display: flex; flex-direction: column; align-items: center; gap: 15px; width: calc(100% - 24px);
+        }
+        .hp-widget-symbol { width: 70px; height: 70px; background: url('assets/symbol.png') no-repeat center; background-size: contain; filter: drop-shadow(0 0 8px rgba(255, 69, 0, 0.5)); }
+        #hpValue { font-family: 'MedievalSharp', cursive; font-size: 5em; color: #ff4d4d; line-height: 0.8; margin: 5px 0; text-shadow: 0 0 15px rgba(255, 0, 0, 0.4); }
+        .hp-circle-btn { width: 60px !important; height: 60px !important; border-radius: 50% !important; font-size: 1.8em !important; }
+        .btn-minus { background: linear-gradient(135deg, #4e342e 0%, #2a1b18 100%) !important; }
+        .btn-plus { background: linear-gradient(135deg, #4a148c 0%, #311b92 100%) !important; }
+
+        .mythos-actions { display: flex; gap: 10px; width: 240px; }
+        .mythos-actions button { flex: 1; }
+
+        .symbol-count-badge { 
+            position: absolute; top: -24px; right: -24px; width: 85px; height: 85px; display: none;
+            align-items: center; justify-content: center; background: url('assets/symbol.png') no-repeat center;
+            background-size: contain; color: #fff; font-size: 34px; font-weight: 900; 
+            text-shadow: 3px 3px 2px #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0 0 15px rgba(255,0,0,1);
+            z-index: 10; font-family: 'MedievalSharp', cursive; filter: drop-shadow(0 0 10px rgba(255,0,0,0.6));
+        }
+
+        .history-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; width: 240px; margin-top: 10px; }
+        .history-item { aspect-ratio: 235/368; border: 1px solid #555; border-radius: 4px; background-color: #111; background-repeat: no-repeat; cursor: pointer; }
+
+        #previewOverlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.95); z-index: 2000; display: none; justify-content: center; align-items: center; backdrop-filter: blur(10px); }
+        #previewCard { border: 4px solid #ffcf67; border-radius: 15px; background-color: #000; background-repeat: no-repeat; }
+    </style>
+</head>
+<body onload="checkPersistence()">
+
+    <div id="previewOverlay" onclick="hidePreview()">
+        <div id="previewCard"></div>
+    </div>
+
+    <div class="sidebar-left" id="leftNav">
+        <div class="nav-header">
+            <button onclick="toggleNav()" class="menu-btn">
+                <span class="material-symbols-outlined">menu</span>
+            </button>
+            <div class="setup-row">
+                <div class="label" style="font-size: 0.9em;">-</div>
+                <button id="connectBtn" onclick="initFolder()" style="height: 38px;">
+                    <span class="material-symbols-outlined">folder_open</span>
+                </button>
+                <button id="restoreBtn" class="alt-btn" style="display:none; height: 38px;" onclick="restoreFolder()">
+                    <span class="material-symbols-outlined">settings_backup_restore</span>
+                </button>
+            </div>
+        </div>
+        
+        <div id="controls" style="display:none; flex-direction: column; gap:15px;">
+            <div class="label">Elder One</div>
+            <select id="bossSelect" onchange="loadBoss()"></select>
+            <div class="label">Scenario</div>
+            <select id="scenarioSelect" onchange="loadScenario()"></select>
+            
+            <div class="hp-tracker-widget">
+                <div class="hp-widget-symbol"></div>
+                <span id="hpValue">0</span>
+                <div class="hp-widget-controls">
+                    <button class="hp-circle-btn btn-minus" onclick="changeHP(-1)">-</button>
+                    <button class="hp-circle-btn btn-plus" onclick="changeHP(1)">+</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="mainContainer">
+        <div class="game-grid">
+            <div class="column">
+                <div class="label">Elder One Stage</div>
+                <div id="stageView" class="viewport boss-card" onclick="zoom(this, 'boss')"></div>
+                <div style="display:flex; gap:10px; width:100%;">
+                    <button class="alt-btn" id="prevBtn" onclick="changeStage(-1)">PREV</button>
+                    <button id="nextBtn" onclick="changeStage(1)">NEXT</button>
+                </div>
+                <div class="label" style="margin-top:10px;">Boss Minion</div>
+                <div id="minionView" class="viewport minion-card" onclick="zoom(this, 'fit')"></div>
+            </div>
+            <div class="column">
+                <div class="label">Scenario Card</div>
+                <div id="scenarioView" class="viewport scenario-card" onclick="zoom(this, 'fit')"></div>
+                <div class="label" style="margin-top:63px;">Scenario Monsters</div>
+                <div id="monsterView" class="viewport scenario-card" onclick="zoom(this, 'fit')"></div>
+            </div>
+        </div>
+
+        <div class="sidebar-right">
+            <div class="label">Mythos Deck</div>
+            <div id="mythosView" class="viewport mythos-card" onclick="zoom(this, 'mythos_main')">
+                <div id="symbolBadge" class="symbol-count-badge">0</div>
+                <div id="mythosOverlaySymbol"></div>
+            </div>
+            <div id="countDisplay" style="font-weight:bold; color:#aaa; font-size:0.8em; margin: 5px 0;">Cards: 0</div>
+            
+            <div class="mythos-actions"> 
+                <button id="drawBtn" onclick="drawMythos()" title="Draw Card">
+                    <span class="material-symbols-outlined">style</span>
+                </button>
+                <button id="shuffleBtn" class="alt-btn" onclick="initDeck()" disabled title="Shuffle Deck">
+                    <span class="material-symbols-outlined">autorenew</span>
+                </button>
+                <button class="symbol-btn" onclick="cycleSymbolCount()" title="Cycle Symbol (0-3) / Reset">
+                    <img src="assets/symbol.png" class="btn-icon-img" alt="Symbol">
+                </button>
+            </div>
+
+            <div class="label" style="margin-top: 15px; font-size: 0.9em;">History</div>
+            <div id="historyGrid" class="history-grid"></div>
+        </div>
+    </div>
+
+    <script>
+        let folders = { bosses: {}, scenarios: {} };
+        let currentBossMythosUrl = "", currentScenarioMythosUrl = "";
+        let deck = [], drawnHistory = [], currentStageIdx = 0, hp = 0, symbolCounter = 0;
+
+        function toggleNav() { document.getElementById('leftNav').classList.toggle('collapsed'); }
+        
+        function cycleSymbolCount() {
+            if (symbolCounter >= 3) {
+                initDeck(); // Auto-reset when clicking after 3
+                return;
+            }
+
+            symbolCounter++;
+            const badge = document.getElementById('symbolBadge');
+            badge.innerText = symbolCounter;
+            badge.style.display = 'flex';
+            
+            const overlay = document.getElementById('mythosOverlaySymbol');
+            const mythosViewport = document.getElementById('mythosView');
+            const drawBtn = document.getElementById('drawBtn');
+            
+            if (symbolCounter === 3) {
+                overlay.classList.add('visible');
+                mythosViewport.classList.add('danger-glow');
+                drawBtn.disabled = true;
+            }
+        }
+
+        async function openDB() { return new Promise((res) => { const req = indexedDB.open('CDMD_DB', 1); req.onupgradeneeded = () => req.result.createObjectStore('handles'); req.onsuccess = () => res(req.result); }); }
+        async function saveHandle(handle) { const db = await openDB(); const tx = db.transaction('handles', 'readwrite'); tx.objectStore('handles').put(handle, 'rootFolder'); }
+        async function getSavedHandle() { const db = await openDB(); return new Promise(res => { const req = db.transaction('handles').objectStore('handles').get('rootFolder'); req.onsuccess = () => res(req.result); }); }
+        async function checkPersistence() { const handle = await getSavedHandle(); if (handle) { document.getElementById('connectBtn').style.display = 'none'; document.getElementById('restoreBtn').style.display = 'block'; } }
+        async function restoreFolder() { const handle = await getSavedHandle(); if (await handle.queryPermission({mode: 'readwrite'}) !== 'granted') await handle.requestPermission({mode: 'readwrite'}); processFolder(handle); }
+        async function initFolder() { try { const root = await window.showDirectoryPicker(); await saveHandle(root); processFolder(root); } catch (err) {} }
+
+        async function processFolder(root) {
+            const bSel = document.getElementById('bossSelect'); const sSel = document.getElementById('scenarioSelect');
+            bSel.innerHTML = ''; sSel.innerHTML = '';
+            for await (const entry of root.values()) {
+                if (entry.kind === 'directory') {
+                    if (entry.name.toLowerCase() === 'bosses') for await (const b of entry.values()) if(b.kind==='directory') { folders.bosses[b.name]=b; bSel.add(new Option(b.name,b.name)); }
+                    if (entry.name.toLowerCase() === 'scenarios') for await (const s of entry.values()) if(s.kind==='directory') { folders.scenarios[s.name]=s; sSel.add(new Option(s.name,s.name)); }
+                }
+            }
+            document.getElementById('controls').style.display = 'flex';
+            document.getElementById('mainContainer').classList.add('active');
+            createHistorySlots();
+            if (bSel.options.length > 0) loadBoss();
+        }
+
+        function createHistorySlots() {
+            const grid = document.getElementById('historyGrid'); grid.innerHTML = '';
+            for(let i=0; i<16; i++) {
+                const div = document.createElement('div'); div.className = 'history-item'; div.id = `hist-${i}`;
+                div.onclick = (e) => { e.stopPropagation(); showHistoryZoom(i); };
+                grid.appendChild(div);
+            }
+        }
+
+        async function loadBoss() {
+            const folder = folders.bosses[document.getElementById('bossSelect').value];
+            for await (const entry of folder.values()) {
+                const file = await entry.getFile();
+                const url = URL.createObjectURL(file);
+                const name = entry.name.toLowerCase();
+                if (name.includes('mythos')) currentBossMythosUrl = url;
+                if (name.includes('stage')) document.getElementById('stageView').dataset.url = url;
+                if (name.includes('minion')) document.getElementById('minionView').dataset.url = url;
+            }
+            updateViewports(); loadScenario();
+        }
+
+        async function loadScenario() {
+            const folder = folders.scenarios[document.getElementById('scenarioSelect').value];
+            for await (const entry of folder.values()) {
+                const name = entry.name.toLowerCase();
+                const file = await entry.getFile();
+                const url = URL.createObjectURL(file);
+                if (name === 'monsters.jpg') document.getElementById('monsterView').dataset.url = url;
+                else if (name === 'scenario.jpg') document.getElementById('scenarioView').dataset.url = url;
+                else if (name.includes('mythos')) currentScenarioMythosUrl = url;
+            }
+            updateViewports(); initDeck(); setStage(0);
+        }
+
+        function updateViewports() {
+            ['stageView', 'minionView', 'monsterView', 'scenarioView'].forEach(id => {
+                const el = document.getElementById(id);
+                if(el.dataset.url) el.style.backgroundImage = `url('${el.dataset.url}')`;
+            });
+        }
+
+        function initDeck() {
+            const grid = [{x:0,y:0},{x:33.33,y:0},{x:66.66,y:0},{x:100,y:0},{x:0,y:100},{x:33.33,y:100},{x:66.66,y:100},{x:100,y:100}];
+            deck = [...grid.map(p=>({...p, type:'boss'})), ...grid.map(p=>({...p, type:'scenario'}))].sort(() => Math.random() - 0.5);
+            drawnHistory = [];
+            symbolCounter = 0; 
+            const badge = document.getElementById('symbolBadge');
+            badge.innerText = 0; badge.style.display = 'none';
+            document.getElementById('mythosOverlaySymbol').classList.remove('visible');
+            document.getElementById('mythosView').classList.remove('danger-glow');
+            document.getElementById('drawBtn').disabled = false;
+            document.getElementById('shuffleBtn').disabled = true;
+            document.getElementById('mythosView').style.backgroundImage = "url('assets/mythoscardback.jpg')";
+            document.getElementById('mythosView').style.backgroundSize = "cover";
+            document.querySelectorAll('.history-item').forEach(item => { item.style.backgroundImage = 'none'; });
+            document.getElementById('countDisplay').innerText = `Cards: ${deck.length}`;
+        }
+
+        function drawMythos() {
+            if (deck.length === 0 || symbolCounter === 3) return;
+            document.getElementById('shuffleBtn').disabled = false;
+            const c = deck.pop(); drawnHistory.push(c);
+            applyStyle(document.getElementById('mythosView'), c);
+            applyStyle(document.getElementById(`hist-${drawnHistory.length - 1}`), c);
+            document.getElementById('drawBtn').disabled = (deck.length === 0);
+            document.getElementById('countDisplay').innerText = `Cards: ${deck.length}`;
+        }
+
+        function applyStyle(el, card) {
+            el.style.backgroundImage = `url('${card.type === 'boss' ? currentBossMythosUrl : currentScenarioMythosUrl}')`;
+            el.style.backgroundSize = "400% 200%"; el.style.backgroundPosition = `${card.x}% ${card.y}%`;
+        }
+
+        function zoom(el, type) {
+            const p = document.getElementById('previewOverlay'); const card = document.getElementById('previewCard');
+            const bgUrl = el.style.backgroundImage.slice(5, -2); if (!bgUrl || bgUrl === "none") return;
+            card.style.backgroundImage = `url('${bgUrl}')`;
+            if (type === 'boss') {
+                card.style.width = "422px"; card.style.height = "368px"; card.style.backgroundSize = "100% 400%";
+                card.style.backgroundPosition = el.style.backgroundPosition; card.style.transform = "scale(2)";
+            } else if (type === 'fit') {
+                card.style.width = el.offsetWidth + "px"; card.style.height = el.offsetHeight + "px";
+                card.style.backgroundSize = "100% 100%"; card.style.transform = "scale(1.5)";
+            } else if (type === 'mythos_main') {
+                const c = drawnHistory[drawnHistory.length -1];
+                card.style.width = "235px"; card.style.height = "368px";
+                if (!c) { card.style.backgroundSize = "cover"; card.style.transform = "scale(2)"; }
+                else { applyStyle(card, c); card.style.transform = "scale(2)"; }
+            }
+            p.style.display = 'flex';
+        }
+
+        function showHistoryZoom(idx) {
+            if (idx >= drawnHistory.length) return;
+            const p = document.getElementById('previewOverlay'); const card = document.getElementById('previewCard');
+            card.style.width = "235px"; card.style.height = "368px";
+            applyStyle(card, drawnHistory[idx]); card.style.transform = "scale(2.2)";
+            p.style.display = 'flex';
+        }
+
+        function hidePreview() { document.getElementById('previewOverlay').style.display = 'none'; }
+        function setStage(idx) {
+            currentStageIdx = idx; document.getElementById('stageView').style.backgroundPosition = `0% ${[100, 66.66, 33.33, 0][idx]}%`;
+            document.getElementById('prevBtn').disabled = (idx === 0); document.getElementById('nextBtn').disabled = (idx === 3);
+        }
+        function changeStage(dir) { let n = currentStageIdx + dir; if (n >= 0 && n < 4) setStage(n); }
+        function changeHP(amt) { hp = Math.max(0, hp + amt); document.getElementById('hpValue').innerText = hp; }
+    </script>
+</body>
+</html>

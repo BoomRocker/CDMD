@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CDMD: iPad Tactical Grid</title>
+    <link href="https://fonts.googleapis.com/css2?family=Caudex:ital,wght@0,400;0,700;1,400;1,700&family=MedievalSharp&display=swap" rel="stylesheet">
+    
+    <style>
+        body { 
+            background: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), url('assets/bg.jpg');
+            background-color: #0a0a0a;
+            background-size: cover; background-position: center; background-attachment: fixed;
+            color: #e0e0e0; font-family: 'Caudex', serif; margin: 0; padding: 10px; 
+            display: flex; flex-direction: column; align-items: center; min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .header { background: rgba(26, 26, 26, 0.9); padding: 10px; border-radius: 8px; border: 1px solid #444; margin-bottom: 15px; display: flex; gap: 15px; align-items: center; width: 95%; justify-content: center; z-index: 100; backdrop-filter: blur(5px); }
+        #mainContainer { display: none; width: 100%; max-width: 1400px; gap: 25px; }
+        #mainContainer.active { display: flex; justify-content: center; }
+
+        .game-grid { display: grid; grid-template-columns: auto auto; gap: 20px; }
+        .sidebar { width: 280px; display: flex; flex-direction: column; align-items: center; gap: 10px; border-left: 1px solid rgba(255,255,255,0.1); padding-left: 20px; }
+        .column { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+
+        .label { 
+            font-family: 'MedievalSharp', cursive; font-weight: bold; font-size: 1.2em; text-transform: uppercase; letter-spacing: 2px;
+            background: linear-gradient(to bottom, #ffcf67 0%, #d32f2f 60%, #8b0000 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0px 2px 2px rgba(0,0,0,0.9));
+        }
+
+        .viewport { 
+            border: 2px solid #444; border-radius: 8px; background-color: rgba(0,0,0,0.8); 
+            background-repeat: no-repeat; background-position: center; 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.6); cursor: zoom-in;
+            transition: border-color 0.2s;
+        }
+        .viewport:active { border-color: #ffcf67; }
+
+        .boss-card { width: 422px; height: 368px; background-size: 100% 400%; }
+        .minion-card { width: 422px; height: 368px; background-size: 100% 100%; }
+        .scenario-card { width: 618px; height: 368px; background-size: 100% 100%; }
+        .mythos-card { width: 235px; height: 368px; background-size: 400% 200%; }
+
+        .history-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; width: 100%; margin-top: 10px; }
+        .history-item { 
+            aspect-ratio: 235/368; border: 2px solid #555; border-radius: 4px; 
+            background-color: #111; background-repeat: no-repeat; background-size: 400% 200%; 
+            cursor: pointer; -webkit-tap-highlight-color: transparent;
+        }
+
+        button { 
+            position: relative;
+            height: 46px; cursor: pointer; border-radius: 6px; font-weight: 700; color: #e0e0e0; font-size: 1em; padding: 0 20px; 
+            font-family: 'Caudex', serif; text-transform: uppercase; letter-spacing: 1px;
+            background: linear-gradient(to bottom, #2d4d3f 0%, #1a3d2f 50%, #122b21 100%);
+            border: 2px solid #8b7355;
+            box-shadow: inset 0 0 12px rgba(0,0,0,0.8), 0 4px 8px rgba(0,0,0,0.5);
+            text-shadow: 1px 1px 2px black;
+            transition: transform 0.05s;
+        }
+
+        button.alt-btn {
+            background: linear-gradient(to bottom, #6d4c41 0%, #4e342e 50%, #3e2723 100%);
+        }
+
+        button::before, button::after {
+            content: ''; position: absolute; width: 4px; height: 4px; 
+            background: #111; border-radius: 50%; box-shadow: 0 1px 1px rgba(255,255,255,0.1);
+        }
+        button::before { top: 6px; left: 6px; box-shadow: 0 30px 0 #111; }
+        button::after { top: 6px; right: 6px; box-shadow: 0 30px 0 #111; }
+
+        button:active:not(:disabled) {
+            transform: translateY(2px);
+            box-shadow: inset 0 0 18px rgba(0,0,0,1);
+        }
+
+        button:disabled { 
+            background: #2a2a2a !important; border-color: #444 !important; color: #666 !important; 
+            filter: grayscale(1); box-shadow: none; 
+        }
+
+        .hp-tracker { font-family: 'Caudex', serif; font-size: 1.6em; font-weight: 700; color: #ff4d4d; display: flex; align-items: center; gap: 12px; background: rgba(17,17,17,0.9); padding: 5px 15px; border-radius: 25px; border: 2px solid #8b7355; }
+        .hp-btn { width: 42px !important; height: 42px !important; border-radius: 50% !important; padding: 0 !important; }
+
+        /* --- PREVIEW OVERLAY FIX --- */
+        #previewOverlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.95); z-index: 2000;
+            display: none; justify-content: center; align-items: center;
+            backdrop-filter: blur(10px); cursor: pointer;
+        }
+        
+        #zoomContentCenter {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            min-height: 100vh; width: 100%;
+        }
+
+        #previewCard {
+            border: 4px solid #ffcf67; border-radius: 15px;
+            background-color: #000; background-repeat: no-repeat;
+            box-shadow: 0 0 60px rgba(0,0,0,1);
+            position: relative; background-position: center; background-size: contain;
+        }
+        
+        #closeText {
+            font-family: 'MedievalSharp', cursive;
+            color: #ffcf67;
+            letter-spacing: 3px;
+            font-size: 1.4em;
+            text-shadow: 0 0 15px black;
+            animation: pulse 2s infinite;
+            position: relative; 
+            z-index: 2100;
+            margin-top: 280px; /* Explicitly pushes text below scaled image */
+            flex-shrink: 0;
+        }
+
+        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+    </style>
+</head>
+<body onload="checkPersistence()">
+
+    <div id="previewOverlay" onclick="hidePreview()">
+        <div id="zoomContentCenter">
+            <div id="previewCard"></div>
+            <div id="closeText">TAP TO CLOSE</div>
+        </div>
+    </div>
+
+    <div class="header">
+        <button id="connectBtn" onclick="initFolder()">📁 CONNECT FOLDER</button>
+        <button id="restoreBtn" class="alt-btn" style="display:none;" onclick="restoreFolder()">🔄 RESTORE ACCESS</button>
+        
+        <div id="controls" style="display:none; gap:20px; align-items:center;">
+            <select id="bossSelect" onchange="loadBoss()" style="padding: 10px; background: #222; color: white; border: 1px solid #8b7355; font-family: 'Caudex';"></select>
+            <select id="scenarioSelect" onchange="loadScenario()" style="padding: 10px; background: #222; color: white; border: 1px solid #8b7355; font-family: 'Caudex';"></select>
+            <div class="hp-tracker">
+                <button class="hp-btn alt-btn" onclick="changeHP(-1)">-</button>
+                <span id="hpValue">12</span>
+                <button class="hp-btn alt-btn" style="filter: hue-rotate(-50deg);" onclick="changeHP(1)">+</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="mainContainer">
+        <div class="game-grid">
+            <div class="column">
+                <div class="label">Elder One Stage</div>
+                <div id="stageView" class="viewport boss-card" onclick="zoom(this, 'boss')"></div>
+                <div style="display:flex; gap:10px;">
+                    <button id="prevBtn" class="alt-btn" onclick="changeStage(-1)">PREV</button>
+                    <button id="nextBtn" onclick="changeStage(1)">NEXT</button>
+                </div>
+                <div class="label" style="margin-top:10px;">Boss Minion</div>
+                <div id="minionView" class="viewport minion-card" onclick="zoom(this, 'fit')"></div>
+            </div>
+            <div class="column">
+                <div class="label">Scenario Card</div>
+                <div id="scenarioView" class="viewport scenario-card" onclick="zoom(this, 'fit')"></div>
+                <div class="label" style="margin-top:54px;">Scenario Monsters</div>
+                <div id="monsterView" class="viewport scenario-card" onclick="zoom(this, 'fit')"></div>
+            </div>
+        </div>
+        <div class="sidebar">
+            <div class="label">Mythos Deck</div>
+            <div id="mythosView" class="viewport mythos-card" onclick="zoom(this, 'mythos_main')"></div>
+            <div id="countDisplay" style="font-weight:bold; color:#aaa; font-size:0.9em;">Cards: 8</div>
+            <button id="drawBtn" style="width: 100%;" onclick="drawMythos()">DRAW CARD</button>
+            <button class="alt-btn" style="width: 100%; margin-top: 5px;" onclick="initDeck()">SHUFFLE</button>
+            
+            <div class="label" style="margin-top: 15px; font-size: 0.9em;">History (Tap to Zoom)</div>
+            <div id="historyGrid" class="history-grid"></div>
+        </div>
+    </div>
+
+    <script>
+        let folders = { bosses: {}, scenarios: {} };
+        let currentMythosUrl = "", deck = [], drawnHistory = [], currentStageIdx = 0, hp = 12;
+
+        async function openDB() { return new Promise((res) => { const req = indexedDB.open('CDMD_DB', 1); req.onupgradeneeded = () => req.result.createObjectStore('handles'); req.onsuccess = () => res(req.result); }); }
+        async function saveHandle(handle) { const db = await openDB(); const tx = db.transaction('handles', 'readwrite'); tx.objectStore('handles').put(handle, 'rootFolder'); }
+        async function getSavedHandle() { const db = await openDB(); return new Promise(res => { const req = db.transaction('handles').objectStore('handles').get('rootFolder'); req.onsuccess = () => res(req.result); }); }
+
+        async function checkPersistence() {
+            const handle = await getSavedHandle();
+            if (handle) { document.getElementById('connectBtn').style.display = 'none'; document.getElementById('restoreBtn').style.display = 'block'; }
+        }
+
+        async function restoreFolder() {
+            try {
+                const handle = await getSavedHandle();
+                if (await handle.queryPermission({mode: 'readwrite'}) !== 'granted') {
+                    await handle.requestPermission({mode: 'readwrite'});
+                }
+                // Chrome fix: Use setTimeout to ensure the browser registers the permission grant before file access
+                setTimeout(() => processFolder(handle), 100);
+            } catch (err) { console.error("Restore failed:", err); }
+        }
+
+        async function initFolder() { try { const root = await window.showDirectoryPicker(); await saveHandle(root); processFolder(root); } catch (err) {} }
+
+        async function processFolder(root) {
+            const bSel = document.getElementById('bossSelect');
+            const sSel = document.getElementById('scenarioSelect');
+            bSel.innerHTML = ''; sSel.innerHTML = '';
+            
+            try {
+                for await (const entry of root.values()) {
+                    if (entry.kind === 'directory') {
+                        if (entry.name.toLowerCase() === 'bosses') {
+                            for await (const b of entry.values()) if(b.kind==='directory') { folders.bosses[b.name]=b; bSel.add(new Option(b.name,b.name)); }
+                        }
+                        if (entry.name.toLowerCase() === 'scenarios') {
+                            for await (const s of entry.values()) if(s.kind==='directory') { folders.scenarios[s.name]=s; sSel.add(new Option(s.name,s.name)); }
+                        }
+                    }
+                }
+                document.getElementById('controls').style.display = 'flex';
+                document.getElementById('mainContainer').style.display = 'flex';
+                document.getElementById('mainContainer').classList.add('active');
+                document.getElementById('restoreBtn').style.display = 'none';
+                document.getElementById('connectBtn').style.display = 'none';
+                createHistorySlots();
+                if (bSel.options.length > 0) loadBoss();
+                if (sSel.options.length > 0) loadScenario();
+            } catch (e) { alert("Access Denied or Folder Empty. Try Reconnecting."); }
+        }
+
+        function createHistorySlots() {
+            const grid = document.getElementById('historyGrid');
+            grid.innerHTML = '';
+            for(let i=0; i<8; i++) {
+                const div = document.createElement('div');
+                div.className = 'history-item';
+                div.id = `hist-${i}`;
+                div.onclick = (e) => { e.stopPropagation(); showHistoryZoom(i); };
+                grid.appendChild(div);
+            }
+        }
+
+        async function loadBoss() {
+            const folder = folders.bosses[document.getElementById('bossSelect').value];
+            for await (const entry of folder.values()) {
+                const name = entry.name.toLowerCase();
+                const url = URL.createObjectURL(await entry.getFile());
+                if (name.includes('mythos')) currentMythosUrl = url;
+                if (name.includes('stage')) document.getElementById('stageView').dataset.url = url;
+                if (name.includes('minion')) document.getElementById('minionView').dataset.url = url;
+            }
+            updateViewports(); initDeck(); setStage(0);
+        }
+
+        async function loadScenario() {
+            const folder = folders.scenarios[document.getElementById('scenarioSelect').value];
+            for await (const entry of folder.values()) {
+                const name = entry.name.toLowerCase();
+                const url = URL.createObjectURL(await entry.getFile());
+                if (name === 'monsters.jpg') document.getElementById('monsterView').dataset.url = url;
+                if (name === 'scenario.jpg') document.getElementById('scenarioView').dataset.url = url;
+            }
+            updateViewports();
+        }
+
+        function updateViewports() {
+            ['stageView', 'minionView', 'monsterView', 'scenarioView'].forEach(id => {
+                const el = document.getElementById(id);
+                if(el.dataset.url) el.style.backgroundImage = `url('${el.dataset.url}')`;
+            });
+        }
+
+        function initDeck() {
+            deck = [{x:0,y:0},{x:33.33,y:0},{x:66.66,y:0},{x:100,y:0},{x:0,y:100},{x:33.33,y:100},{x:66.66,y:100},{x:100,y:100}].sort(()=>Math.random()-0.5);
+            drawnHistory = [];
+            document.getElementById('drawBtn').disabled = false;
+            const v = document.getElementById('mythosView');
+            v.style.backgroundImage = "url('assets/mythoscardback.jpg')";
+            v.style.backgroundSize = "cover";
+            v.style.backgroundPosition = "center";
+            document.querySelectorAll('.history-item').forEach(item => item.style.backgroundImage = 'none');
+            document.getElementById('countDisplay').innerText = `Cards: ${deck.length}`;
+        }
+
+        function drawMythos() {
+            if (deck.length === 0) return;
+            const c = deck.pop();
+            drawnHistory.push(c);
+            const v = document.getElementById('mythosView');
+            v.style.backgroundImage = `url('${currentMythosUrl}')`;
+            v.style.backgroundSize = "400% 200%";
+            v.style.backgroundPosition = `${c.x}% ${c.y}%`;
+            const histItem = document.getElementById(`hist-${drawnHistory.length - 1}`);
+            histItem.style.backgroundImage = `url('${currentMythosUrl}')`;
+            histItem.style.backgroundPosition = `${c.x}% ${c.y}%`;
+            document.getElementById('drawBtn').disabled = (deck.length === 0);
+            document.getElementById('countDisplay').innerText = `Cards: ${deck.length}`;
+        }
+
+        function zoom(el, type) {
+            const p = document.getElementById('previewOverlay');
+            const card = document.getElementById('previewCard');
+            const bgUrl = el.style.backgroundImage.slice(5, -2);
+            if (!bgUrl || bgUrl === "none") return;
+            card.style.backgroundImage = `url('${bgUrl}')`;
+            if (bgUrl.includes('mythoscardback')) {
+                card.style.width = "235px"; card.style.height = "368px";
+                card.style.backgroundSize = "cover"; card.style.backgroundPosition = "center";
+                card.style.transform = "scale(2)";
+            } else if (type === 'boss') {
+                card.style.width = "422px"; card.style.height = "368px";
+                card.style.backgroundSize = "100% 400%";
+                card.style.backgroundPosition = el.style.backgroundPosition;
+                card.style.transform = "scale(2)";
+            } else if (type === 'fit') {
+                card.style.width = el.offsetWidth + "px"; card.style.height = el.offsetHeight + "px";
+                card.style.backgroundSize = "100% 100%"; card.style.backgroundPosition = "center";
+                card.style.transform = "scale(1.5)";
+            } else if (type === 'mythos_main') {
+                const c = drawnHistory[drawnHistory.length -1];
+                card.style.width = "235px"; card.style.height = "368px";
+                if (!c) { card.style.backgroundSize = "cover"; card.style.backgroundPosition = "center"; }
+                else { card.style.backgroundSize = "400% 200%"; card.style.backgroundPosition = `${c.x}% ${c.y}%`; }
+                card.style.transform = "scale(2)";
+            }
+            p.style.display = 'flex';
+        }
+
+        function showHistoryZoom(idx) {
+            if (idx >= drawnHistory.length) return;
+            const c = drawnHistory[idx];
+            const p = document.getElementById('previewOverlay');
+            const card = document.getElementById('previewCard');
+            card.style.backgroundImage = `url('${currentMythosUrl}')`;
+            card.style.width = "235px"; card.style.height = "368px";
+            card.style.backgroundSize = "400% 200%";
+            card.style.backgroundPosition = `${c.x}% ${c.y}%`;
+            card.style.transform = "scale(2.2)";
+            p.style.display = 'flex';
+        }
+
+        function hidePreview() { document.getElementById('previewOverlay').style.display = 'none'; }
+        function setStage(idx) {
+            currentStageIdx = idx;
+            document.getElementById('stageView').style.backgroundPosition = `0% ${[100, 66.66, 33.33, 0][idx]}%`;
+            document.getElementById('prevBtn').disabled = (idx === 0);
+            document.getElementById('nextBtn').disabled = (idx === 3);
+            document.getElementById('nextBtn').innerText = (idx === 3) ? "FINAL" : "NEXT";
+        }
+        function changeStage(dir) { let n = currentStageIdx + dir; if (n >= 0 && n < 4) setStage(n); }
+        function changeHP(amt) { hp = Math.max(0, hp + amt); document.getElementById('hpValue').innerText = hp; }
+    </script>
+</body>
+</html>
