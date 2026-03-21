@@ -60,12 +60,7 @@
 			width: 100%;
 		}
 
-		/* 2. Adjust your footer to sit ABOVE the bar, not behind it */
-		#footerControls {
-			/* env(safe-area-inset-bottom) is the secret iPad variable */
-			bottom: calc(10px + env(safe-area-inset-bottom)) !important;
-			padding-bottom: 5px;
-		}
+
 		
 		@keyframes stage-flash {
 			0% { filter: brightness(3); transform: scale(1.02); }
@@ -362,7 +357,7 @@
 
         let currentBossMythosUrl = "", currentScenarioMythosUrl = "";
         let deck = [], drawnHistory = [], currentStageIdx = 0, symbolCounter = 0;
-        let verX = 2, verY = 1;
+        let verX = 3, verY = 1;
 
         function vibrate() { if (window.navigator.vibrate) window.navigator.vibrate(20); }
         
