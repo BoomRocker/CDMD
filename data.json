@@ -1,0 +1,36 @@
+{
+  "bosses": {
+    "Cthuhlu": {
+      "stage": "bosses/Cthuhlu/stage.jpg",
+      "minion": "bosses/Cthuhlu/minion.jpg",
+      "mythos": "bosses/Cthuhlu/mythos.jpg"
+    }
+	"Yog-Sothoth": {
+      "stage": "bosses/Yog-Sothoth/stage.jpg",
+      "minion": "bosses/Yog-Sothoth/minion.jpg",
+      "mythos": "bosses/Yog-Sothoth/mythos.jpg"
+    }
+	"Hastur": {
+      "stage": "bosses/Hastur/stage.jpg",
+      "minion": "bosses/Hastur/minion.jpg",
+      "mythos": "bosses/Hastur/mythos.jpg"
+    }
+	"Bubba": {
+      "stage": "bosses/Bubba/stage.jpg",
+      "minion": "bosses/Bubba/minion.jpg",
+      "mythos": "bosses/Bubba/mythos.jpg"
+    }
+  },
+  "scenarios": {
+    "fire": {
+      "scenario": "scenarios/fire/scenario.jpg",
+      "monster": "scenarios/fire/monster.jpg",
+      "mythos": "scenarios/fire/mythos.jpg"
+    }
+	"ice": {
+      "scenario": "scenarios/ice/scenario.jpg",
+      "monster": "scenarios/ice/monster.jpg",
+      "mythos": "scenarios/ice/mythos.jpg"
+    }
+  }
+}

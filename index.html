@@ -3,65 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>CDMD: Tactical Grid</title>
+    <title>CDMD: Tactical Grid (GitHub Edition)</title>
 
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Tactical Grid">
     
+	<link rel="icon" type="image/png" href="assets/symbol.png">
+	<link rel="apple-touch-icon" href="assets/symbol.png">
+    <link rel="manifest" href="manifest.json">
+
     <link href="https://fonts.googleapis.com/css2?family=Caudex:ital,wght@0,400;0,700;1,400;1,700&family=MedievalSharp&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
     
     <style>
-        :root { --accent: #ffcf67; --danger: #8b0000; }
+        :root { --accent: #ffcf67; --danger: #d32f2f; }
         body { 
-            background: #1a1a1a; color: #e0e0e0; font-family: 'Caudex', serif; margin: 0; padding: 0; 
-            display: flex; height: 100vh; overflow: hidden; position: fixed; width: 100%;
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('assets/bg.jpg'); 
+            background-size: cover; background-position: center; background-attachment: fixed;
+            color: #e0e0e0; font-family: 'Caudex', serif; margin: 0; padding: 0; 
+            display: flex; height: 100vh; overflow: hidden;
+            position: fixed; width: 100%;
         }
+
+        /* --- UI Elements --- */
+        .menu-logo { width: 100%; max-width: 280px; height: auto; align-self: center; margin-bottom: 10px; filter: drop-shadow(0 0 10px rgba(0,0,0,0.5)); }
+
         #footerControls { position: fixed; bottom: 20px; right: 20px; z-index: 1000; display: flex; align-items: center; gap: 12px; }
-        #menuToggle { width: 55px; height: 55px; border-radius: 50%; background: rgba(45, 77, 63, 0.9); border: 2px solid #8b7355; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+        #versionTag { color: var(--accent); font-family: 'MedievalSharp'; font-size: 0.9em; text-shadow: 2px 2px 4px black; opacity: 0.8; }
+        #menuToggle { width: 55px; height: 55px; border-radius: 50%; background: rgba(45, 77, 63, 0.9); border: 2px solid #8b7355; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px); box-shadow: 0 4px 15px rgba(0,0,0,0.6); }
+
         #navDrawer { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 2000; display: none; justify-content: center; align-items: center; backdrop-filter: blur(10px); }
-        .drawer-content { background: #222; border: 3px solid #444; border-radius: 20px; width: 340px; padding: 25px; display: flex; flex-direction: column; gap: 20px; }
+        .drawer-content { background: #1a1a1a; border: 3px solid #444; border-radius: 20px; width: 340px; padding: 25px; display: flex; flex-direction: column; gap: 15px; box-shadow: 0 0 30px rgba(0,0,0,0.8); }
+
+        /* --- Inputs --- */
+        input[type="text"] { width: 100%; height: 45px; background: #000; color: #fff; border: 1px solid #8b7355; border-radius: 6px; padding: 0 10px; box-sizing: border-box; font-family: 'Caudex'; font-size: 1em; }
+        .input-group { display: flex; flex-direction: column; gap: 5px; }
+        .error-msg { color: #ff4444; font-size: 0.8em; text-align: center; display: none; }
+
+        /* --- Game Grid --- */
         #mainContainer { display: none; padding: 15px; flex-grow: 1; flex-direction: column; gap: 10px; width: 100vw; box-sizing: border-box; }
         #mainContainer.active { display: flex; }
         .game-layout-top { display: flex; gap: 20px; flex: 1; min-height: 0; justify-content: center; }
         .game-grid { display: grid; grid-template-columns: auto auto; gap: 15px; }
-        .viewport { position: relative; border: 3px solid #444; border-radius: 12px; background-color: rgba(0,0,0,0.6); background-repeat: no-repeat; background-position: center; }
+        .sidebar-right { width: 230px; display: flex; flex-direction: column; align-items: center; gap: 8px; flex-shrink: 0; }
+        .column { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+        .label { font-family: 'MedievalSharp'; font-weight: bold; font-size: 0.9em; text-transform: uppercase; color: var(--accent); text-shadow: 0 2px 4px black; }
+
+        .viewport { position: relative; border: 3px solid #444; border-radius: 12px; background-color: #000; background-repeat: no-repeat; background-position: center; box-shadow: 0 5px 15px rgba(0,0,0,0.6); }
         .boss-card { width: 340px; height: 280px; background-size: 100% 400%; }
-        .minion-card { width: 340px; height: 280px; background-size: 100% 100%; }
-        .scenario-card { width: 460px; height: 280px; background-size: 100% 100%; }
-        .mythos-card { width: 220px; height: 340px; z-index: 50; background-size: cover; border: 2px solid #444; border-radius: 10px; }
-        .label { font-family: 'MedievalSharp'; font-weight: bold; font-size: 0.9em; text-transform: uppercase; color: var(--accent); }
-        button { height: 50px; cursor: pointer; border-radius: 8px; font-family: 'MedievalSharp'; background: #2d4d3f; border: 1px solid #8b7355; color: white; }
-        select { width: 100%; height: 50px; background: #000; color: var(--accent); border: 1px solid #8b7355; padding: 0 10px; }
-        .history-bar { display: flex; gap: 10px; overflow-x: auto; padding: 10px; height: 130px; }
-        .history-item { flex: 0 0 80px; height: 110px; border: 1px solid #444; background-size: 410% 210%; }
-        #previewOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 3000; display: none; justify-content: center; align-items: center; }
+        .minion-card { width: 340px; height: 280px; background-size: 100% 100%; cursor: zoom-in; }
+        .scenario-card { width: 460px; height: 280px; background-size: 100% 100%; cursor: zoom-in; }
+        .mythos-card { width: 220px; height: 340px; cursor: zoom-in; z-index: 50; }
+        
+        .deck-layer { position: absolute; inset: 0; background: url('assets/mythoscardback.jpg') no-repeat center; background-size: cover; border: 3px solid #444; border-radius: 12px; transition: 0.3s; }
+        .layer-2 { transform: translate(4px, 4px); z-index: 40; }
+        .layer-3 { transform: translate(8px, 8px); z-index: 30; }
+
+        /* --- Buttons & Selects --- */
+        button { height: 55px; cursor: pointer; border-radius: 6px; font-family: 'MedievalSharp'; background: linear-gradient(#2d4d3f, #122b21); border: 2px solid #8b7355; color: white; display: flex; align-items: center; justify-content: center; }
+        button:disabled { opacity: 0.3; cursor: not-allowed; filter: grayscale(1); }
+        select { width: 100%; height: 55px; background: #000; color: var(--accent); border: 2px solid #8b7355; border-radius: 8px; padding: 0 15px; font-family: 'MedievalSharp'; appearance: none; -webkit-appearance: none; }
+
+        /* Animation & Badges (Keep original logic) */
+        .stage-nav-btn { position: absolute; top: 35%; transform: translateY(-50%); width: 35px; height: 35px; background: rgba(0,0,0,0.4); border: 1px solid var(--accent); color: var(--accent); border-radius: 4px; display: none; align-items: center; justify-content: center; z-index: 110; cursor: pointer; }
+        #stagePrev { left: 55px; } #stageNext { right: 1px; }
+        #bossMessage { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('assets/symbol.png') no-repeat center; background-size: 60%; color: var(--accent); font-family: 'MedievalSharp'; font-size: 2.5em; text-align: center; padding: 20px; z-index: 120; }
+        .symbol-count-badge { position: absolute; top: -10px; right: -10px; width: 80px; height: 80px; background: rgba(0,0,0,.8) url('assets/symbol.png') no-repeat center; background-size: 100%; border-radius: 50%; display: none; align-items: center; justify-content: center; color: #fff; font-family: 'MedievalSharp'; font-size: 52px; z-index: 80; }
+        .history-bar { display: flex; gap: 12px; overflow-x: auto; padding: 10px; height: 140px; }
+        .history-item { flex: 0 0 80px; height: 125px; border: 1px solid #444; border-radius: 6px; background-size: 400% 200%; cursor: pointer; }
+        #previewOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 3000; display: none; justify-content: center; align-items: center; }
+        #previewCard { border: 6px solid var(--accent); border-radius: 20px; background-color: #000; background-repeat: no-repeat; }
     </style>
 </head>
-<body onload="toggleDrawer()">
+<body onload="initApp()">
 
     <div id="previewOverlay" onclick="this.style.display='none'">
-        <div id="previewCard" style="background-repeat: no-repeat; border: 4px solid var(--accent);"></div>
+        <div id="previewCard"></div>
     </div>
 
     <div id="footerControls">
+        <span id="versionTag">v1.4.0</span>
         <button id="menuToggle" onclick="toggleDrawer()"><span class="material-symbols-outlined">settings</span></button>
     </div>
 
-    <div id="navDrawer">
-        <div class="drawer-content">
-            <div class="label" style="text-align: center; font-size: 1.2em;">GitHub Sync</div>
-            <button id="connectBtn" onclick="loadFromGitHub()">SYNC REPOSITORY</button>
+    <div id="navDrawer" onclick="closeDrawer(event)">
+        <div class="drawer-content" onclick="event.stopPropagation()">
+            <img src="assets/logo.png" alt="CDMD Logo" class="menu-logo">
+            
+            <div id="setupFields">
+                <div class="input-group">
+                    <label class="label">GitHub User</label>
+                    <input type="text" id="ghUser" placeholder="e.g. CyberWizard">
+                </div>
+                <div class="input-group">
+                    <label class="label">Repository</label>
+                    <input type="text" id="ghRepo" placeholder="e.g. CDMD-Assets">
+                </div>
+                <div class="input-group">
+                    <label class="label">Branch</label>
+                    <input type="text" id="ghBranch" value="main">
+                </div>
+                <button id="connectBtn" onclick="initGitHub()" style="margin-top:10px;">CONNECT GITHUB</button>
+                <div id="errorMsg" class="error-msg">GitHub Error. Check Names.</div>
+            </div>
+
             <div id="drawerControls" style="display:none; flex-direction: column; gap:15px;">
-                <div>
+                <div class="column">
                     <div class="label">Elder One</div>
                     <select id="bossSelect" onchange="loadBoss()"></select>
                 </div>
-                <div>
+                <div class="column">
                     <div class="label">Scenario</div>
                     <select id="scenarioSelect" onchange="loadScenario()"></select>
                 </div>
-                <button onclick="commitGameSettings()">START GAME</button>
+                <button onclick="commitGameSettings()" style="width: 100%;">SAVE & PLAY</button>
+                <button onclick="resetConnection()" style="background:none; border:none; text-decoration: underline; height:auto; font-size: 0.8em; opacity: 0.6;">Reset GitHub Link</button>
             </div>
         </div>
     </div>
@@ -70,157 +127,259 @@
         <div class="game-layout-top">
             <div class="game-grid">
                 <div class="column">
-                    <div class="label">Elder One: <span id="bossNameTitle">...</span></div>
-                    <div id="stageView" class="viewport boss-card" onclick="zoom(this, 'boss')"></div>
-                    <div class="label">Minions</div>
+                    <div class="label">Elder One : <span id="bossNameTitle">...</span></div>
+                    <div id="stageView" class="viewport boss-card">
+                        <div id="bossMessage">"the boss lumbers forward..."</div>
+                        <div id="stagePrev" class="stage-nav-btn" onclick="event.stopPropagation(); changeStage(-1)"><span class="material-symbols-outlined">navigate_before</span></div>
+                        <div id="stageNext" class="stage-nav-btn" onclick="event.stopPropagation(); changeStage(1)"><span class="material-symbols-outlined">navigate_next</span></div>
+                        <div style="position:absolute; inset:10px 60px; cursor: zoom-in; z-index: 105;" onclick="zoom(this.parentElement, 'boss')"></div>
+                    </div>
+                    <div class="label" style="margin:5px 0 0 0;"><span id="minionNameTitle">Elder One</span> : Minions</div>
                     <div id="minionView" class="viewport minion-card" onclick="zoom(this, 'fit')"></div>
                 </div>
-                <div class="column">
-                    <div class="label">Scenario: <span id="scenarioNameTitle">...</span></div>
+                <div class="column" >
+                    <div class="label">Scenario : <span id="scenarioNameTitle">...</span></div>
                     <div id="scenarioView" class="viewport scenario-card" onclick="zoom(this, 'fit')"></div>
-                    <div class="label">Monsters</div>
+                    <div class="label" style="margin:5px 0 0 0;"><span id="monsterNameTitle">Scenario</span> : Monsters</div>
                     <div id="monsterView" class="viewport scenario-card" onclick="zoom(this, 'fit')"></div>
                 </div>
             </div>
-            <div class="sidebar" style="width: 220px; display:flex; flex-direction:column; gap:10px;">
-                <div class="label">Mythos</div>
-                <div id="mythosView" class="viewport mythos-card" onclick="zoom(this, 'mythos')"></div>
-                <button onclick="drawMythos()">DRAW CARD</button>
-                <button onclick="initDeck()" style="background:#444;">SHUFFLE</button>
+
+            <div class="sidebar-right">
+                <div class="label" >Mythos</div>
+                <div id="deckContainer" style="position: relative; width: 220px; height: 340px; border-radius: 20px; border:1px solid #333; background-image: url('assets/mythoscardback.jpg');background-size: cover;">
+                    <div class="deck-layer layer-3"></div>
+                    <div class="deck-layer layer-2"></div>
+                    <div id="mythosView" class="viewport mythos-card" onclick="zoom(this, 'mythos_main')">
+                        <div id="symbolBadge" class="symbol-count-badge">0</div>
+                        <div id="mythosOverlaySymbol"></div>
+                    </div>
+                </div>
+                <div id="countDisplay">Remaining: 0</div>
+                <div style="display:flex; gap:8px; width:100%">
+                    <button id="drawBtn" onclick="drawMythos()" style="flex:1"><span class="material-symbols-outlined">style</span></button>
+                    <button onclick="initDeck()" style="flex:1; background:linear-gradient(#6d4c41, #3e2723)"><span class="material-symbols-outlined">autorenew</span></button>
+                    <button onclick="cycleSymbolCount()" style="flex:1; background:linear-gradient(#642800, #3d1a00)"><span class="material-symbols-outlined">add_circle</span></button>
+                </div>
             </div>
         </div>
         <div id="historyBar" class="history-bar"></div>
     </div>
 
     <script>
-        const GH_USER = "boomrocker";
-        const GH_REPO = "CDMD";
-        const API_BASE = `https://api.github.com/repos/${GH_USER}/${GH_REPO}/contents`;
-        const RAW_BASE = `https://raw.githubusercontent.com/${GH_USER}/${GH_REPO}/main`;
+        let folders = { bosses: {}, scenarios: {} };
+        let currentBossMythosUrl = "", currentScenarioMythosUrl = "";
+        let deck = [], drawnHistory = [], currentStageIdx = 0, symbolCounter = 0;
 
-        let assetMap = { bosses: {}, scenarios: {} };
-        let deck = [], history = [];
-        let bossMythos = "", scenarioMythos = "";
-
-        function toggleDrawer() { 
-            const d = document.getElementById('navDrawer');
-            d.style.display = (d.style.display === 'flex') ? 'none' : 'flex';
+        function initApp() {
+            // Load saved GitHub info if it exists
+            const saved = JSON.parse(localStorage.getItem('gh_config'));
+            if(saved) {
+                document.getElementById('ghUser').value = saved.user;
+                document.getElementById('ghRepo').value = saved.repo;
+                document.getElementById('ghBranch').value = saved.branch;
+            }
+            toggleDrawer(); 
         }
 
-        async function loadFromGitHub() {
+        function toggleDrawer() { const d = document.getElementById('navDrawer'); d.style.display = (d.style.display === 'flex') ? 'none' : 'flex'; }
+        function closeDrawer(e) { if(e.target.id === 'navDrawer') toggleDrawer(); }
+        function vibrate() { if (window.navigator.vibrate) window.navigator.vibrate(20); }
+
+        async function initGitHub() {
+            const user = document.getElementById('ghUser').value.trim();
+            const repo = document.getElementById('ghRepo').value.trim();
+            const branch = document.getElementById('ghBranch').value.trim();
             const btn = document.getElementById('connectBtn');
-            btn.innerText = "SEARCHING...";
+            const err = document.getElementById('errorMsg');
+
+            if(!user || !repo) { alert("Enter User and Repo name."); return; }
+
+            btn.innerText = "FETCHING..."; btn.disabled = true;
+            err.style.display = 'none';
+
             try {
-                const root = await fetch(API_BASE).then(r => r.json());
-                const bossDir = root.find(f => f.name.toLowerCase() === 'bosses');
-                const scenDir = root.find(f => f.name.toLowerCase() === 'scenarios');
+                // Save for next time
+                localStorage.setItem('gh_config', JSON.stringify({user, repo, branch}));
 
-                if (bossDir) {
-                    const bList = await fetch(bossDir.url).then(r => r.json());
-                    const bSel = document.getElementById('bossSelect');
-                    bSel.innerHTML = "";
-                    bList.filter(f => f.type === 'dir').forEach(f => {
-                        assetMap.bosses[f.name] = f.path;
-                        bSel.add(new Option(f.name, f.name));
-                    });
+                const rootUrl = `https://api.github.com/repos/${user}/${repo}/contents/?ref=${branch}`;
+                const response = await fetch(rootUrl);
+                if(!response.ok) throw new Error();
+                const root = await response.json();
+
+                for (const entry of root) {
+                    if (entry.name.toLowerCase() === 'bosses') {
+                        const list = await (await fetch(entry.url)).json();
+                        for (const b of list) if (b.type === 'dir') {
+                            folders.bosses[b.name] = await (await fetch(b.url)).json();
+                            document.getElementById('bossSelect').add(new Option(b.name, b.name));
+                        }
+                    }
+                    if (entry.name.toLowerCase() === 'scenarios') {
+                        const list = await (await fetch(entry.url)).json();
+                        for (const s of list) if (s.type === 'dir') {
+                            folders.scenarios[s.name] = await (await fetch(s.url)).json();
+                            document.getElementById('scenarioSelect').add(new Option(s.name, s.name));
+                        }
+                    }
                 }
 
-                if (scenDir) {
-                    const sList = await fetch(scenDir.url).then(r => r.json());
-                    const sSel = document.getElementById('scenarioSelect');
-                    sSel.innerHTML = "";
-                    sList.filter(f => f.type === 'dir').forEach(f => {
-                        assetMap.scenarios[f.name] = f.path;
-                        sSel.add(new Option(f.name, f.name));
-                    });
-                }
-
+                document.getElementById('setupFields').style.display = 'none';
                 document.getElementById('drawerControls').style.display = 'flex';
-                btn.innerText = "CONNECTED";
-                btn.disabled = true;
                 loadBoss();
+
             } catch (e) {
-                console.error(e);
-                btn.innerText = "SYNC FAILED";
+                err.style.display = 'block';
+                btn.innerText = "CONNECT GITHUB"; btn.disabled = false;
             }
+        }
+
+        function resetConnection() {
+            localStorage.removeItem('gh_config');
+            location.reload();
+        }
+
+        function getRawUrl(path) {
+            const c = JSON.parse(localStorage.getItem('gh_config'));
+            return `https://raw.githubusercontent.com/${c.user}/${c.repo}/${c.branch}/${path}`;
         }
 
         async function loadBoss() {
             const name = document.getElementById('bossSelect').value;
-            const files = await fetch(`${API_BASE}/${assetMap.bosses[name]}`).then(r => r.json());
-            files.forEach(f => {
-                const url = `${RAW_BASE}/${f.path}`;
-                if (f.name.toLowerCase().includes('stage')) document.getElementById('stageView').dataset.url = url;
-                if (f.name.toLowerCase().includes('minion')) document.getElementById('minionView').dataset.url = url;
-                if (f.name.toLowerCase().includes('mythos')) bossMythos = url;
-            });
             document.getElementById('bossNameTitle').innerText = name;
-            loadScenario();
+            document.getElementById('minionNameTitle').innerText = name;
+            folders.bosses[name].forEach(file => {
+                const url = getRawUrl(file.path);
+                const n = file.name.toLowerCase();
+                if (n.includes('mythos')) currentBossMythosUrl = url;
+                if (n.includes('stage')) document.getElementById('stageView').dataset.url = url;
+                if (n.includes('minion')) document.getElementById('minionView').dataset.url = url;
+            });
+            if (Object.keys(folders.scenarios).length > 0) loadScenario();
         }
 
         async function loadScenario() {
             const name = document.getElementById('scenarioSelect').value;
-            const files = await fetch(`${API_BASE}/${assetMap.scenarios[name]}`).then(r => r.json());
-            files.forEach(f => {
-                const url = `${RAW_BASE}/${f.path}`;
-                if (f.name.toLowerCase().includes('monster')) document.getElementById('monsterView').dataset.url = url;
-                if (f.name.toLowerCase().includes('scenario')) document.getElementById('scenarioView').dataset.url = url;
-                if (f.name.toLowerCase().includes('mythos')) scenarioMythos = url;
-            });
             document.getElementById('scenarioNameTitle').innerText = name;
+            document.getElementById('monsterNameTitle').innerText = name;
+            folders.scenarios[name].forEach(file => {
+                const url = getRawUrl(file.path);
+                const n = file.name.toLowerCase();
+                if (n.includes('monster')) document.getElementById('monsterView').dataset.url = url;
+                else if (n.includes('scenario')) document.getElementById('scenarioView').dataset.url = url;
+                else if (n.includes('mythos')) currentScenarioMythosUrl = url;
+            });
         }
 
         function commitGameSettings() {
-            ['stageView', 'minionView', 'monsterView', 'scenarioView'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el.dataset.url) el.style.backgroundImage = `url('${el.dataset.url}')`;
-            });
+            vibrate();
             document.getElementById('mainContainer').classList.add('active');
-            initDeck();
-            toggleDrawer();
+            ['stageView', 'minionView', 'monsterView', 'scenarioView'].forEach(id => {
+                const el = document.getElementById(id); 
+                if(el.dataset.url) el.style.backgroundImage = `url('${el.dataset.url}')`;
+            });
+            initDeck(); setStage(0); toggleDrawer();
         }
 
-        function initDeck() {
-            const grid = [{x:0,y:0},{x:33,y:0},{x:66,y:0},{x:100,y:0},{x:0,y:100},{x:33,y:100},{x:66,y:100},{x:100,y:100}];
-            deck = [
-                ...grid.map(p => ({...p, type:'boss'})),
-                ...grid.map(p => ({...p, type:'scen'}))
-            ].sort(() => Math.random() - 0.5);
-            history = [];
-            document.getElementById('historyBar').innerHTML = '';
-            document.getElementById('mythosView').style.backgroundImage = "none";
+        // Logic functions (Mythos, Draw, Zoom) remain same as original for stability
+        async function initDeck() {
+            vibrate();
+            const historyBar = document.getElementById('historyBar');
+            const mythosView = document.getElementById('mythosView');
+            historyBar.innerHTML = '';
+            
+            const grid = [{x:0,y:0},{x:33.33,y:0},{x:66.66,y:0},{x:100,y:0},{x:0,y:100},{x:33.33,y:100},{x:66.66,y:100},{x:100,y:100}];
+            deck = [...grid.map(p=>({...p, type:'boss'})), ...grid.map(p=>({...p, type:'scenario'}))].sort(() => Math.random() - 0.5);
+            drawnHistory = []; symbolCounter = 0;
+            
+            document.getElementById('symbolBadge').style.display = 'none';
+            document.getElementById('mythosOverlaySymbol').classList.remove('visible');
+            mythosView.classList.remove('danger-glow');
+            document.getElementById('stageView').classList.remove('danger-glow');
+            document.getElementById('bossMessage').style.display = 'none';
+            document.getElementById('drawBtn').disabled = false;
+            mythosView.style.backgroundImage = "url('assets/mythoscardback.jpg')";
+            mythosView.style.backgroundSize = "cover";
+            document.getElementById('countDisplay').innerText = `Remaining: ${deck.length}`;
+            updateStageNav();
         }
 
         function drawMythos() {
-            if (!deck.length) return;
-            const c = deck.pop();
-            history.push(c);
-            const view = document.getElementById('mythosView');
-            const url = c.type === 'boss' ? bossMythos : scenarioMythos;
-            view.style.backgroundImage = `url('${url}')`;
-            view.style.backgroundPosition = `${c.x}% ${c.y}%`;
-            view.style.backgroundSize = "410% 210%";
+            if (deck.length === 0 || symbolCounter === 3) return;
+            vibrate();
+            const c = deck.pop(); drawnHistory.push(c);
+            const currentIdx = drawnHistory.length - 1;
 
+            const mythosView = document.getElementById('mythosView');
+            applyStyle(mythosView, c);
             const item = document.createElement('div');
-            item.className = 'history-item';
-            item.style.backgroundImage = `url('${url}')`;
-            item.style.backgroundPosition = `${c.x}% ${c.y}%`;
+            item.className = 'history-item'; applyStyle(item, c);
+            item.onclick = (e) => { e.stopPropagation(); showHistoryZoom(currentIdx); };
             document.getElementById('historyBar').prepend(item);
+            document.getElementById('countDisplay').innerText = `Remaining: ${deck.length}`;
+            if (deck.length === 0) document.getElementById('drawBtn').disabled = true;
+        }
+
+        function applyStyle(el, card) {
+            const url = card.type === 'boss' ? currentBossMythosUrl : currentScenarioMythosUrl;
+            el.style.backgroundImage = `url('${url}')`;
+            el.style.backgroundSize = "410% 210%"; el.style.backgroundPosition = `${card.x}% ${card.y}%`;
         }
 
         function zoom(el, type) {
-            const p = document.getElementById('previewOverlay');
-            const card = document.getElementById('previewCard');
-            card.style.backgroundImage = el.style.backgroundImage;
+            if (el.style.backgroundImage.includes('mythoscardback.jpg')) return;
+            vibrate();
+            const p = document.getElementById('previewOverlay'); const card = document.getElementById('previewCard');
+            const bgUrl = el.style.backgroundImage.slice(5, -2);
+            card.style.backgroundImage = `url('${bgUrl}')`;
             card.style.backgroundPosition = el.style.backgroundPosition;
-            card.style.backgroundSize = el.style.backgroundSize;
-            
-            if (type === 'boss') { card.style.width = "80vw"; card.style.height = "60vh"; }
-            else if (type === 'fit') { card.style.width = "90vw"; card.style.height = "40vh"; }
-            else { card.style.width = "300px"; card.style.height = "450px"; }
-            
+            if (type === 'boss') { card.style.width = "100vh"; card.style.height = "85vh"; card.style.backgroundSize = "100% 400%"; } 
+            else if (type === 'fit') { card.style.width = "90vw"; card.style.height = "60vw"; card.style.backgroundSize = "100% 100%"; } 
+            else { card.style.height = "85vh"; card.style.width = "58vh"; card.style.backgroundSize = "410% 210%"; }
             p.style.display = 'flex';
         }
+
+        function showHistoryZoom(idx) {
+            const c = drawnHistory[idx]; vibrate();
+            const p = document.getElementById('previewOverlay'); const card = document.getElementById('previewCard');
+            const url = c.type === 'boss' ? currentBossMythosUrl : currentScenarioMythosUrl;
+            card.style.backgroundImage = `url('${url}')`;
+            card.style.backgroundPosition = `${c.x}% ${c.y}%`;
+            card.style.backgroundSize = "410% 210%"; card.style.height = "85vh"; card.style.width = "58vh";
+            p.style.display = 'flex';
+        }
+
+        function cycleSymbolCount() {
+            vibrate();
+            if (symbolCounter >= 3) { initDeck(); return; }
+            symbolCounter++;
+            const badge = document.getElementById('symbolBadge');
+            badge.innerText = symbolCounter; badge.style.display = 'flex';
+            if (symbolCounter === 3) {
+                document.getElementById('mythosOverlaySymbol').classList.add('visible');
+                const selectedBoss = document.getElementById('bossSelect').value;
+                document.getElementById('bossMessage').innerText = `"${selectedBoss} lumbers forward..."`;
+                document.getElementById('mythosView').classList.add('danger-glow');
+                document.getElementById('stageView').classList.add('danger-glow');
+                document.getElementById('bossMessage').style.display = 'flex';
+                document.getElementById('drawBtn').disabled = true;
+            }
+            updateStageNav();
+        }
+
+        function updateStageNav() {
+            const prev = document.getElementById('stagePrev'); const next = document.getElementById('stageNext');
+            if (symbolCounter === 3) { prev.style.display = 'none'; next.style.display = 'none'; return; }
+            prev.style.display = (currentStageIdx === 0) ? 'none' : 'flex';
+            next.style.display = (currentStageIdx === 3) ? 'none' : 'flex';
+        }
+
+        function setStage(idx) { 
+            vibrate(); currentStageIdx = idx; 
+            document.getElementById('stageView').style.backgroundPosition = `0% ${[100, 66.66, 33.33, 0][idx]}%`; 
+            updateStageNav();
+        }
+        function changeStage(dir) { let n = currentStageIdx + dir; if (n >= 0 && n < 4) setStage(n); }
     </script>
 </body>
 </html>
