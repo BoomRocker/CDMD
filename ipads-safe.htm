@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
     
     <style>
-        :root { --accent: #ffcf67; --danger: #d32f2f; --panel-bg: #1a1a1a; }
+        :root { --accent: #ffcf67; --danger: #d32f2f; }
         body { 
             background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('assets/bg.jpg'); 
             background-size: cover; background-position: center; background-attachment: fixed;
@@ -16,13 +16,7 @@
             display: flex; height: 100vh; overflow: hidden;
         }
 
-        /* --- Version & Navigation --- */
-        #versionTag {
-            position: fixed; bottom: 38px; right: 85px; 
-            font-family: 'MedievalSharp'; font-size: 14px; color: var(--accent);
-            text-shadow: 2px 2px 4px black; opacity: 0.8; pointer-events: none;
-            z-index: 999;
-        }
+        .menu-logo { width: 100%; max-width: 280px; height: auto; align-self: center; margin-bottom: 10px; filter: drop-shadow(0 0 10px rgba(0,0,0,0.5)); }
 
         #menuToggle {
             position: fixed; bottom: 20px; right: 20px; z-index: 1000;
@@ -32,41 +26,17 @@
             backdrop-filter: blur(5px); box-shadow: 0 4px 15px rgba(0,0,0,0.6);
         }
 
-        /* --- Drawer & Setup UI --- */
         #navDrawer {
             position: fixed; inset: 0; background: rgba(0,0,0,0.85);
             z-index: 2000; display: none; justify-content: center; align-items: center;
             backdrop-filter: blur(10px);
         }
         .drawer-content {
-            background: var(--panel-bg); border: 3px solid #444; border-radius: 20px;
-            width: 360px; padding: 15px 25px 25px 25px; display: flex; flex-direction: column; gap: 12px;
-            box-shadow: 0 0 40px rgba(0,0,0,0.9);
-        }
-        .menu-logo { 
-            width: 100%; max-width: 220px; height: auto; align-self: center; 
-            margin: 0 auto 5px auto; filter: drop-shadow(0 0 10px rgba(0,0,0,0.5)); 
+            background: #1a1a1a; border: 3px solid #444; border-radius: 20px;
+            width: 340px; padding: 25px; display: flex; flex-direction: column; gap: 20px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.8);
         }
 
-        select { 
-            width: 100%; height: 48px; background: #0a0a0a; color: var(--accent); 
-            border: 1px solid #555; border-radius: 8px; padding: 0 15px; 
-            font-family: 'Caudex'; font-size: 1.1em; cursor: pointer;
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23ffcf67' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-            background-repeat: no-repeat; background-position: right 12px center;
-            transition: border-color 0.3s;
-        }
-        select:focus { border-color: var(--accent); outline: none; }
-
-        .primary-btn {
-            background: #2e7d32; font-size: 1.2em; border-color: #4caf50; 
-            margin-top: 5px; box-shadow: 0 0 15px rgba(76, 175, 80, 0.2);
-            transition: 0.3s;
-        }
-        .primary-btn:hover { box-shadow: 0 0 20px rgba(76, 175, 80, 0.4); }
-
-        /* --- Main Layout --- */
         #mainContainer { display: none; padding: 15px; flex-grow: 1; flex-direction: column; gap: 10px; width: 100vw; box-sizing: border-box; }
         #mainContainer.active { display: flex; }
 
@@ -75,7 +45,7 @@
         .sidebar-right { width: 230px; display: flex; flex-direction: column; align-items: center; gap: 8px; flex-shrink: 0; }
         .column { display: flex; flex-direction: column; align-items: center; gap: 5px; }
 
-        .label { font-family: 'MedievalSharp'; font-weight: bold; font-size: 0.95em; text-transform: uppercase; color: var(--accent); text-shadow: 0 2px 4px black; }
+        .label { font-family: 'MedievalSharp'; font-weight: bold; font-size: 0.9em; text-transform: uppercase; color: var(--accent); text-shadow: 0 2px 4px black; }
 
         .viewport { 
             position: relative; border: 3px solid #444; border-radius: 12px; background-color: #000; 
@@ -93,51 +63,73 @@
         .layer-2 { transform: translate(4px, 4px); z-index: 40; }
         .layer-3 { transform: translate(8px, 8px); z-index: 30; }
 
-        /* Animation Classes */
+        .stage-nav-btn {
+            position: absolute; top: 50%; transform: translateY(-50%); width: 45px; height: 100px;
+            background: rgba(0,0,0,0.2); border: 1px solid rgba(255,207,103,0.3);
+            color: var(--accent); border-radius: 4px; display: none; 
+            align-items: center; justify-content: center; z-index: 110;
+            cursor: pointer; backdrop-filter: blur(1px);
+        }
+        .stage-nav-btn:active { background: var(--accent); color: black; }
+        #stagePrev { left: 5px; }
+        #stageNext { right: 5px; }
+
         .shuffle-active { animation: shuffle-spin 0.8s cubic-bezier(0.45, 0.05, 0.55, 0.95) both; }
         .shuffle-layers { animation: layer-spin 0.8s cubic-bezier(0.45, 0.05, 0.55, 0.95) both; }
 
         @keyframes shuffle-spin {
             0% { transform: scale(1) rotate(0deg); }
-            30% { transform: scale(1.15) rotate(180deg); filter: brightness(1.5); }
+            30% { transform: scale(1.2) rotate(180deg); filter: brightness(1.5); }
             100% { transform: scale(1) rotate(360deg); filter: brightness(1); }
         }
         @keyframes layer-spin {
             0% { transform: translate(4px, 4px) rotate(0deg); }
-            50% { transform: translate(-20px, 10px) rotate(-180deg); opacity: 0.6; }
+            50% { transform: translate(-25px, 15px) rotate(-180deg); opacity: 0.6; }
             100% { transform: translate(4px, 4px) rotate(-360deg); opacity: 1; }
         }
 
+        #mythosOverlaySymbol { position: absolute; inset: 0; background: url('assets/symbol.png') no-repeat center; background-size: 70%; opacity: 0; transition: 0.5s; pointer-events: none; z-index: 60; }
+        #mythosOverlaySymbol.visible { opacity: 0.8; filter: drop-shadow(0 0 15px red); }
+        
+        .danger-glow { border-color: #ff0000 !important; box-shadow: 0 0 25px rgba(255, 0, 0, 0.8) !important; }
+        
         #bossMessage {
             position: absolute; inset: 0; display: none; align-items: center; justify-content: center;
             background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('assets/symbol.png') no-repeat center;
             background-size: 60%; background-blend-mode: multiply; color: var(--accent);
             font-family: 'MedievalSharp'; font-size: 2.5em; text-align: center; padding: 20px; 
-            pointer-events: none; z-index: 120; text-shadow: 3px 3px 6px #000; animation: fade-in 0.5s forwards;
+            pointer-events: none; z-index: 120; text-shadow: 3px 3px 6px #000, 0 0 15px #000; 
+            filter: drop-shadow(0 0 15px rgba(0,0,0,1)); animation: fade-in 0.5s forwards;
         }
 
         .symbol-count-badge { 
             position: absolute; top: -10px; right: -10px; width: 80px; height: 80px; 
             background: rgba(0,0,0,.8) url('assets/symbol.png') no-repeat center; background-size: 100%;
-            border-radius: 50%; display: none; align-items: center; justify-content: center; 
+            border-radius: 50%; border: 0px solid #000; display: none; align-items: center; justify-content: center; 
             color: #fff; font-family: 'MedievalSharp'; font-size: 52px; z-index: 80;
-            text-shadow: 5px 5px 5px #000;
+            text-shadow: 5px 5px 5px #000, 1px 1px 0 #000, 1px 1px 0 #000, 1px 1px 0 #000, 5px 5px 0 #000;
         }
 
         .history-bar { display: flex; gap: 12px; overflow-x: auto; padding: 10px; height: 140px; }
         .history-item { flex: 0 0 80px; height: 125px; border: 1px solid #444; border-radius: 6px; background-size: 400% 200%; cursor: pointer; transition: 0.2s; }
-        #historyBar .history-item:first-child { border: 2px solid var(--accent); transform: scale(1.08); z-index: 2; opacity: 1; }
+        
+        #historyBar .history-item:first-child { border: 2px solid var(--accent); transform: scale(1.08); z-index: 2; opacity: 1; filter: brightness(1.1); }
+        #historyBar .history-item:not(:first-child) { opacity: 0.7; }
+        #historyBar .history-item:hover { opacity: 1; transform: scale(1.05); border-color: var(--accent); }
 
-        #previewOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 3000; display: none; justify-content: center; align-items: center; }
-        #previewCard { border: 6px solid var(--accent); border-radius: 20px; background-color: #000; pointer-events: auto; }
+        #previewOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 3000; display: none; justify-content: center; align-items: center; cursor: pointer; }
+        #previewCard { border: 6px solid var(--accent); border-radius: 20px; background-color: #000; background-repeat: no-repeat; pointer-events: auto; }
 
-        button { height: 50px; cursor: pointer; border-radius: 6px; font-family: 'MedievalSharp'; background: linear-gradient(#2d4d3f, #122b21); border: 2px solid #8b7355; color: white; display: flex; align-items: center; justify-content: center; }
-        button:disabled { opacity: 0.3; cursor: not-allowed; }
+        button { height: 55px; cursor: pointer; border-radius: 6px; font-family: 'MedievalSharp'; background: linear-gradient(#2d4d3f, #122b21); border: 2px solid #8b7355; color: white; display: flex; align-items: center; justify-content: center; }
+        button:disabled { opacity: 0.3; cursor: not-allowed; filter: grayscale(1); }
         .button-row { display: flex; gap: 8px; width: 100%; }
         .alt-btn { background: linear-gradient(#6d4c41, #3e2723); }
         .symbol-btn { background: linear-gradient(#642800, #3d1a00); }
         
-        #countDisplay { color: #aaa; font-size: 0.8em; }
+        #countDisplay { color: #aaa; font-size: 0.8em; margin: 2px 0; }
+        select { width: 100%; height: 45px; background: #000; color: var(--accent); border: 1px solid #444; border-radius: 6px; padding: 0 10px; font-family: 'Caudex'; }
+        
+        /* Loading Overlay for Auto-Init */
         #loader { font-family: 'MedievalSharp'; color: var(--accent); text-align: center; }
     </style>
 </head>
@@ -147,7 +139,6 @@
         <div id="previewCard"></div>
     </div>
 
-    <div id="versionTag">v1.3.2</div>
     <button id="menuToggle" onclick="toggleDrawer()"><span class="material-symbols-outlined">settings</span></button>
 
     <div id="navDrawer" onclick="closeDrawer(event)">
@@ -156,17 +147,17 @@
             <div id="loadingStatus" style="text-align: center;">
                 <div id="loader">WAKING THE ELDER ONES...</div>
             </div>
-            <div id="drawerControls" style="display:none; flex-direction: column; gap:12px;">
-                <div class="label" style="text-align: center; font-size: 1.2em;">Game Setup</div>
-                <div class="column" style="align-items: stretch;">
+            <div id="drawerControls" style="display:none; flex-direction: column; gap:15px;">
+                <div class="label" style="text-align: center; font-size: 1.4em;">Game Setup</div>
+                <div class="column">
                     <div class="label">Elder One</div>
                     <select id="bossSelect" onchange="loadBoss()"></select>
                 </div>
-                <div class="column" style="align-items: stretch;">
+                <div class="column">
                     <div class="label">Scenario</div>
                     <select id="scenarioSelect" onchange="loadScenario()"></select>
                 </div>
-                <button class="primary-btn" onclick="commitGameSettings()">SAVE & PLAY</button>
+                <button class="primary-btn" onclick="commitGameSettings()" style="background: #2e7d32; font-size: 1.2em; border-color: #4caf50;">SAVE & PLAY</button>
             </div>
         </div>
     </div>
@@ -215,15 +206,25 @@
     </div>
 
     <script>
-        const GH_CONFIG = { user: "boomrocker", repo: "CDMD", basePath: "" };
+        const GH_CONFIG = {
+            user: "boomrocker",  
+            repo: "CDMD",
+            basePath: "" 
+        };
+
         const API_URL = `https://api.github.com/repos/${GH_CONFIG.user}/${GH_CONFIG.repo}/contents`;
+        
+        let folders = { bosses: {}, scenarios: {} };
         let currentBossMythosUrl = "", currentScenarioMythosUrl = "";
         let deck = [], drawnHistory = [], currentStageIdx = 0, symbolCounter = 0;
 
         function vibrate() { if (window.navigator.vibrate) window.navigator.vibrate(20); }
 
         function initApp() { 
-            document.getElementById('navDrawer').style.display = 'flex';
+            // Show the drawer automatically
+            const d = document.getElementById('navDrawer');
+            d.style.display = 'flex';
+            // Start loading GitHub immediately
             initGitHub();
         }
 
@@ -234,17 +235,24 @@
             try {
                 const bSel = document.getElementById('bossSelect'); 
                 const sSel = document.getElementById('scenarioSelect');
+                bSel.innerHTML = ''; sSel.innerHTML = '';
+
+                // Note: Cases MUST match your repo exactly
                 const bResp = await fetch(`${API_URL}/Bosses`);
                 const bDirs = await bResp.json();
                 bDirs.forEach(d => { if(d.type === 'dir') bSel.add(new Option(d.name, d.name)); });
+
                 const sResp = await fetch(`${API_URL}/scenarios`);
                 const sDirs = await sResp.json();
                 sDirs.forEach(d => { if(d.type === 'dir') sSel.add(new Option(d.name, d.name)); });
+
                 document.getElementById('drawerControls').style.display = 'flex';
                 document.getElementById('loadingStatus').style.display = 'none';
+                
                 if (bSel.options.length > 0) loadBoss();
             } catch (err) {
-                document.getElementById('loader').innerText = "CONNECTION FAILED";
+                document.getElementById('loader').innerText = "FAILED TO CONNECT TO RLYEH (Check GitHub)";
+                console.error(err);
             }
         }
 
@@ -252,14 +260,18 @@
             const bossName = document.getElementById('bossSelect').value;
             document.getElementById('bossNameTitle').innerText = bossName;
             document.getElementById('minionNameTitle').innerText = bossName + ":";
+
             const resp = await fetch(`${API_URL}/Bosses/${bossName}`);
             const files = await resp.json();
+
             files.forEach(f => {
-                const url = f.download_url, name = f.name.toLowerCase();
+                const url = f.download_url;
+                const name = f.name.toLowerCase();
                 if (name.includes('mythos')) currentBossMythosUrl = url;
                 if (name.includes('stage')) document.getElementById('stageView').dataset.url = url;
                 if (name.includes('minion')) document.getElementById('minionView').dataset.url = url;
             });
+            
             if (document.getElementById('scenarioSelect').options.length > 0) loadScenario();
         }
 
@@ -267,10 +279,13 @@
             const scenarioName = document.getElementById('scenarioSelect').value;
             document.getElementById('scenarioNameTitle').innerText = scenarioName;
             document.getElementById('monsterNameTitle').innerText = scenarioName + ":";
+
             const resp = await fetch(`${API_URL}/scenarios/${scenarioName}`);
             const files = await resp.json();
+
             files.forEach(f => {
-                const url = f.download_url, name = f.name.toLowerCase();
+                const url = f.download_url;
+                const name = f.name.toLowerCase();
                 if (name.includes('monster')) document.getElementById('monsterView').dataset.url = url;
                 else if (name.includes('scenario')) document.getElementById('scenarioView').dataset.url = url;
                 else if (name.includes('mythos')) currentScenarioMythosUrl = url;
@@ -297,35 +312,34 @@
                 new Audio('assets/flip.mp3').play().catch(() => {});
                 items.forEach((item, index) => {
                     setTimeout(() => {
+                        item.style.opacity = '0';
                         const rect = item.getBoundingClientRect();
                         const deckRect = mythosView.getBoundingClientRect();
+                        const scaleTarget = deckRect.width / rect.width;
                         const flyer = document.createElement('div');
                         flyer.className = 'history-item';
-                        flyer.style.cssText = `position:fixed; top:${rect.top}px; left:${rect.left}px; width:${rect.width}px; height:${rect.height}px; z-index:3000; background-image:url('assets/mythoscardback.jpg'); background-size:cover; pointer-events:none; transition: all 0.6s cubic-bezier(0.25, 0.1, 0.25, 1);`;
+                        flyer.style.cssText = `position:fixed; top:${rect.top}px; left:${rect.left}px; width:${rect.width}px; height:${rect.height}px; z-index:1; background-image:url('assets/mythoscardback.jpg'); background-size:cover; pointer-events:none; opacity:1; transition: top 0.6s cubic-bezier(0.25, 0.1, 0.25, 1), left 0.6s cubic-bezier(0.25, 0.1, 0.25, 1), transform 0.6s cubic-bezier(0.25, 0.1, 0.25, 1), opacity 0.1s linear 0.5s;`;
                         document.body.appendChild(flyer);
-                        item.style.opacity = '0';
-                        
                         requestAnimationFrame(() => {
-                            flyer.style.top = (deckRect.top) + 'px';
-                            flyer.style.left = (deckRect.left) + 'px';
-                            flyer.style.width = deckRect.width + 'px';
-                            flyer.style.height = deckRect.height + 'px';
+                            flyer.style.top = (deckRect.top + 120) + 'px';
+                            flyer.style.left = deckRect.left + 'px';
                             flyer.style.opacity = '0';
-                            flyer.style.transform = `rotate(360deg)`;
+                            flyer.style.transform = `scale(${scaleTarget}) rotate(360deg)`;
                         });
-                        setTimeout(() => flyer.remove(), 650);
-                    }, index * 50);
+                        setTimeout(() => flyer.remove(), 700);
+                    }, index * 60);
                 });
             }
 
-            const waitTime = items.length > 0 ? (items.length * 50) + 100 : 0;
+            const waitTime = items.length > 0 ? (items.length * 60) + 50 : 0;
             setTimeout(() => {
                 new Audio('assets/shuffling-cards-6.mp3').play().catch(() => {});
+                const layers = document.querySelectorAll('.deck-layer');
                 mythosView.classList.remove('shuffle-active'); 
-                document.querySelectorAll('.deck-layer').forEach(l => l.classList.remove('shuffle-layers'));
+                layers.forEach(l => l.classList.remove('shuffle-layers'));
                 void mythosView.offsetWidth;
                 mythosView.classList.add('shuffle-active'); 
-                document.querySelectorAll('.deck-layer').forEach(l => l.classList.add('shuffle-layers'));
+                layers.forEach(l => l.classList.add('shuffle-layers'));
 
                 const grid = [{x:0,y:0},{x:33.33,y:0},{x:66.66,y:0},{x:100,y:0},{x:0,y:100},{x:33.33,y:100},{x:66.66,y:100},{x:100,y:100}];
                 deck = [...grid.map(p=>({...p, type:'boss'})), ...grid.map(p=>({...p, type:'scenario'}))].sort(() => Math.random() - 0.5);
@@ -349,7 +363,10 @@
             vibrate();
             const c = deck.pop(); drawnHistory.push(c);
             const currentIdx = drawnHistory.length - 1;
-            new Audio(deck.length === 0 ? 'assets/enddraw.mp3' : 'assets/card.mp3').play().catch(() => {});
+            if (deck.length === 0) {
+                new Audio('assets/enddraw.mp3').play().catch(() => {});
+                document.getElementById('drawBtn').disabled = true;
+            } else { new Audio('assets/card.mp3').play().catch(() => {}); }
 
             const mythosView = document.getElementById('mythosView');
             applyStyle(mythosView, c);
@@ -358,7 +375,6 @@
             item.onclick = (e) => { e.stopPropagation(); showHistoryZoom(currentIdx); };
             document.getElementById('historyBar').prepend(item);
             document.getElementById('countDisplay').innerText = `Remaining: ${deck.length}`;
-            if (deck.length === 0) document.getElementById('drawBtn').disabled = true;
         }
 
         function applyStyle(el, card) {
@@ -370,8 +386,9 @@
         function zoom(el, type) {
             if (el.style.backgroundImage.includes('mythoscardback.jpg')) return;
             vibrate();
-            const p = document.getElementById('previewOverlay'), card = document.getElementById('previewCard');
-            card.style.backgroundImage = el.style.backgroundImage;
+            const p = document.getElementById('previewOverlay'); const card = document.getElementById('previewCard');
+            const bgUrl = el.style.backgroundImage.slice(5, -2);
+            card.style.backgroundImage = `url('${bgUrl}')`;
             card.style.backgroundPosition = el.style.backgroundPosition;
             if (type === 'boss') { card.style.width = "100vh"; card.style.height = "85vh"; card.style.backgroundSize = "100% 400%"; } 
             else if (type === 'fit') { card.style.width = "90vw"; card.style.height = "60vw"; card.style.backgroundSize = "100% 100%"; } 
@@ -381,7 +398,7 @@
 
         function showHistoryZoom(idx) {
             const c = drawnHistory[idx]; vibrate();
-            const p = document.getElementById('previewOverlay'), card = document.getElementById('previewCard');
+            const p = document.getElementById('previewOverlay'); const card = document.getElementById('previewCard');
             const url = c.type === 'boss' ? currentBossMythosUrl : currentScenarioMythosUrl;
             card.style.backgroundImage = `url('${url}')`;
             card.style.backgroundPosition = `${c.x}% ${c.y}%`;
@@ -398,7 +415,8 @@
             if (symbolCounter === 3) {
                 new Audio('assets/appear.mp3').play().catch(() => {});
                 document.getElementById('mythosOverlaySymbol').classList.add('visible');
-                document.getElementById('bossMessage').innerText = `"${document.getElementById('bossSelect').value} lumbers forward..."`;
+                const selectedBoss = document.getElementById('bossSelect').value;
+                document.getElementById('bossMessage').innerText = `"${selectedBoss} lumbers forward..."`;
                 document.getElementById('mythosView').classList.add('danger-glow');
                 document.getElementById('stageView').classList.add('danger-glow');
                 document.getElementById('bossMessage').style.display = 'flex';
@@ -408,14 +426,16 @@
         }
 
         function updateStageNav() {
-            const prev = document.getElementById('stagePrev'), next = document.getElementById('stageNext');
+            const prev = document.getElementById('stagePrev');
+            const next = document.getElementById('stageNext');
             if (symbolCounter === 3) { prev.style.display = 'none'; next.style.display = 'none'; return; }
             prev.style.display = (currentStageIdx === 0) ? 'none' : 'flex';
             next.style.display = (currentStageIdx === 3) ? 'none' : 'flex';
         }
 
         function setStage(idx) { 
-            vibrate(); currentStageIdx = idx; 
+            vibrate(); 
+            currentStageIdx = idx; 
             document.getElementById('stageView').style.backgroundPosition = `0% ${[100, 66.66, 33.33, 0][idx]}%`; 
             updateStageNav();
         }
