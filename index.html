@@ -8,6 +8,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Tactical Grid">
+
     
 	<link rel="icon" type="image/png" href="assets/symbol.png">
 	<link rel="apple-touch-icon" href="assets/symbol.png">
@@ -26,6 +27,16 @@
 			border: 3px solid rgba(211, 47, 47, calc(0.3 + (var(--boss-intensity) * 0.23))) !important;
 			box-shadow: 0 0 calc(5px + (var(--boss-intensity) * 10px)) rgba(211, 47, 47, calc(var(--boss-intensity) * 0.25)) !important;
 			filter: brightness(calc(1 + (var(--boss-intensity) * 0.1)));
+		}
+		
+		#previewCard.rules-zoom {
+			width: 90vw !important;
+			height: 90vh !important;
+			background-size: contain !important; /* Shows the full page without cropping */
+			background-position: center !important;
+			background-repeat: no-repeat !important;
+			border: 4px solid var(--accent) !important;
+			box-shadow: 0 0 30px rgba(0,0,0,0.9);
 		}
 		
         body { 
@@ -137,6 +148,8 @@
             background-size: 60%; background-blend-mode: multiply; color: var(--accent);
             font-family: 'MedievalSharp'; font-size: 2.5em; text-align: center; padding: 20px; 
             pointer-events: none; z-index: 120; text-shadow: 3px 3px 6px #000, 0 0 15px #000; 
+			color: #fff;
+			
         }
 
         .symbol-count-badge { 
@@ -156,10 +169,10 @@
         button { height: 55px; cursor: pointer; border-radius: 6px; font-family: 'MedievalSharp'; background: linear-gradient(#2d4d3f, #122b21); border: 2px solid #8b7355; color: white; display: flex; align-items: center; justify-content: center; }
         button:disabled { opacity: 0.3; cursor: not-allowed; filter: grayscale(1); }
         .button-row { display: flex; gap: 8px; width: 100%; }
-        .alt-btn { background: linear-gradient(#6d4c41, #3e2723); }
+        .alt-btn { background: linear-gradient(#6d4c41, #3e2723); }\
         .symbol-btn { background: linear-gradient(#642800, #3d1a00); }
         
-        #countDisplay { color: #aaa; font-size: 0.8em; margin: 2px 0; }
+        #countDisplay { color: #aaa; font-size: 1em; margin: 2px 0; color: #8b7355;}
 
 		#historyBar .history-item:first-child {
 			border: 3px solid #ffa500;
@@ -181,6 +194,21 @@
             letter-spacing: 1px; appearance: none; -webkit-appearance: none;
             box-shadow: inset 0 0 10px rgba(0,0,0,0.8); transition: all 0.3s ease;
         }
+		
+		.rules-btn { 
+			width: 100%; 
+			height: 40px;
+			margin-top: 100px;
+			background: rgba(69, 90, 100, 0.25) !important; /* 15% opacity */
+			backdrop-filter: blur(4px); /* Subtle glass effect for iPad */
+			font-size:12px;
+			padding: 0 10px;
+			color:#8b7355;
+		}
+		
+		.symbol-btn { 
+			background: linear-gradient(#642800, #3d1a00) !important; 
+		}
     </style>
 </head>
 <body onload="initApp()">
@@ -198,6 +226,7 @@
         <div class="drawer-content" onclick="event.stopPropagation()">
             <img src="assets/logo.png" alt="CDMD Logo" class="menu-logo">
             <div class="label" style="text-align: center; font-size: 1.4em; color:#8b0000;">Game Setup</div>
+			<hr style="width: 100%; border: 0; border-top: 1px solid #333; margin: 10px 0;">
             <div id="drawerControls" style="display: flex; flex-direction: column; gap:15px;">
                 <div class="column">
                     <div class="label">Elder One</div>
@@ -207,7 +236,14 @@
                     <div class="label">Scenario</div>
                     <select id="scenarioSelect" onchange="loadScenario()"></select>
                 </div>
-                <button onclick="commitGameSettings()" style="width: 100%; font-size: .95em;">SAVE & PLAY</button>
+				<div id="drawerControls" style="display: flex; flex-direction: column; gap:15px;">
+					<button onclick="commitGameSettings()" style="width: 100%; font-size: 1.5em;">SAVE & PLAY</button>
+					<hr style="width: 100%; border: 0; border-top: 1px solid #333; margin: 10px 0;">
+					<button class="alt-btn" onclick="refreshPage()" style="width: 100%; font-size: 0.85em; height: 45px; opacity: 0.8;">
+						<span class="material-symbols-outlined" style="margin-right: 8px; font-size: 20px;">refresh</span> 
+						RELOAD APP
+					</button>
+				</div>
             </div>
         </div>
     </div>
@@ -249,7 +285,12 @@
                     <button id="drawBtn" onclick="drawMythos()" style="flex:1"><span class="material-symbols-outlined">style</span></button>
                     <button class="alt-btn" onclick="initDeck()" style="flex:1"><span class="material-symbols-outlined">autorenew</span></button>
                     <button class="symbol-btn" onclick="cycleSymbolCount()" style="flex:1"><span class="material-symbols-outlined">add_circle</span></button>
-                </div>
+				</div>
+				<div class="sidebar-right">
+					<button class="rules-btn" onclick="zoomRules()" >
+						<span class="material-symbols-outlined" style="margin-right:8px;">menu_book</span> RULES SUMMARY
+					</button>
+				</div>
             </div>
         </div>
         <div id="historyBar" class="history-bar"></div>
@@ -304,6 +345,9 @@
             populateSelectors();
             toggleDrawer(); 
         }
+		
+
+
 
         function populateSelectors() {
             const bSel = document.getElementById('bossSelect');
@@ -523,7 +567,32 @@
 
 				setStage(n); 
 			}
-}
+			
+		}
+		
+		function zoomRules() {
+			vibrate();
+			const p = document.getElementById('previewOverlay');
+			const card = document.getElementById('previewCard');
+			
+			// Set the Rules image URL here
+			const rulesUrl = 'assets/rules.png'; 
+
+			// Reset card and apply specific rules style
+			card.style.cssText = ""; 
+			card.className = "rules-zoom"; 
+			
+			card.style.backgroundImage = `url('${rulesUrl}')`;
+			p.style.display = 'flex';
+		}
+		
+		function refreshPage() {
+			vibrate();
+			// A quick confirmation helps avoid losing your current deck setup by accident
+			if (confirm("This will reset the entire game and reload all assets. Continue?")) {
+				window.location.reload(true);
+		}
+	}
 
     
 	
