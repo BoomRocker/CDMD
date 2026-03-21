@@ -11,38 +11,22 @@
     
 	<link rel="icon" type="image/png" href="assets/symbol.png">
 	<link rel="apple-touch-icon" href="assets/symbol.png">
+    <link rel="manifest" href="manifest.json">
+	
 
     <link href="https://fonts.googleapis.com/css2?family=Caudex:ital,wght@0,400;0,700;1,400;1,700&family=MedievalSharp&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
     
     <style>
-        :root { --accent: #ffcf67; --danger: #d32f2f; --boss-intensity: 0; 	}
-
-		.boss-card { 
-			width: 340px; 
-			height: 280px; 
-			background-size: 100% 400%; 
-			transition: all 0 ease;
-			border: 3px solid rgba(211, 47, 47, calc(0.3 + (var(--boss-intensity) * 0.23))) !important;
-			box-shadow: 0 0 calc(5px + (var(--boss-intensity) * 10px)) rgba(211, 47, 47, calc(var(--boss-intensity) * 0.25)) !important;
-			filter: brightness(calc(1 + (var(--boss-intensity) * 0.1)));
-		}
-		
+        :root { --accent: #ffcf67; --danger: #d32f2f; }
         body { 
             background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('assets/bg.jpg'); 
             background-size: cover; background-position: center; background-attachment: fixed;
             color: #e0e0e0; font-family: 'Caudex', serif; margin: 0; padding: 0; 
             display: flex; height: 100vh; overflow: hidden;
+            /* Prevents rubber-banding on iPad */
             position: fixed; width: 100%;
         }
-		
-		@keyframes stage-flash {
-			0% { filter: brightness(3); transform: scale(1.02); }
-			100% { filter: brightness(1); transform: scale(1); }
-		}
-		.flash-effect {
-			animation: stage-flash 0.4s ease-out;
-		}
 
         .menu-logo { width: 100%; max-width: 280px; height: auto; align-self: center; margin-bottom: 10px; filter: drop-shadow(0 0 10px rgba(0,0,0,0.5)); }
 
@@ -88,27 +72,41 @@
             position: relative; border: 3px solid #444; border-radius: 12px; background-color: #000; 
             background-repeat: no-repeat; background-position: center; box-shadow: 0 5px 15px rgba(0,0,0,0.6);
         }
- 
+        .boss-card { width: 340px; height: 280px; background-size: 100% 400%; }
         .minion-card { width: 340px; height: 280px; background-size: 100% 100%; cursor: zoom-in; }
         .scenario-card { width: 460px; height: 280px; background-size: 100% 100%; cursor: zoom-in; }
         
         .mythos-card { width: 220px; height: 340px; cursor: zoom-in; z-index: 50; }
+		
 		
         .deck-layer {
             position: absolute; inset: 0; background: url('assets/mythoscardback.jpg') no-repeat center;
             background-size: cover; border: 3px solid #444; border-radius: 12px; transition: 0.3s;
         }
 		
+		
         .layer-2 { transform: translate(4px, 4px); z-index: 40; }
         .layer-3 { transform: translate(8px, 8px); z-index: 30; }
 
 		.stage-nav-btn {
-			position: absolute; top: 35%; transform: translateY(-50%); width: 35px; height: 35px;
-			background: rgba(0,0,0,0.4); border: 1px solid var(--accent); color: var(--accent); 
-			border-radius: 4px; display: none; align-items: center; justify-content: center; 
-			z-index: 110; cursor: pointer; backdrop-filter: blur(2px);
+			position: absolute; 
+			top: 35%; 
+			transform: translateY(-50%); 
+			width: 35px; 
+			height: 35px;
+			background: rgba(0,0,0,0.4); /* Darkened for better visibility */
+			border: 1px solid var(--accent);
+			color: var(--accent); 
+			border-radius: 4px; 
+			display: none; /* Controlled by JS */
+			align-items: center; 
+			justify-content: center; 
+			z-index: 110;
+			cursor: pointer; 
+			backdrop-filter: blur(2px);
 		}
 
+		/* Add these two specific anchors */
 		#stagePrev { left: 55px; }
 		#stageNext { right: 1px; }
 
@@ -159,28 +157,51 @@
         .symbol-btn { background: linear-gradient(#642800, #3d1a00); }
         
         #countDisplay { color: #aaa; font-size: 0.8em; margin: 2px 0; }
+       
+	   
 
 		#historyBar .history-item:first-child {
-			border: 3px solid #ffa500;
-			/*box-shadow: 0 0 10px rgba(255, 165, 0, 0.5);*/
-			transform: scale(1.05);
-            opacity: 1;
+			border: 3px solid #ffa500; /* Orange border */
+			box-shadow: 0 0 0 rgba(255, 165, 0, 0.8); /* Optional glow */
+			transform: scale(1.05); /* Optional: makes it slightly larger to pop */
 		}   
 		#historyBar .history-item:not(:first-child) {
 			opacity: 0.75;
-			filter: grayscale(0.3);
-			transition: opacity 0.3s ease;
+			filter: grayscale(0.3); /* Optional: makes them look "faded" into the background */
+			transition: opacity 0.3s ease; /* Smoothly fades when a new card is drawn */
 		}
 
-        select { 
-            width: 100%; height: 55px;
-            background: #000 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23ffcf67' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat right 15px center;
-            background-size: 20px; color: var(--accent); border: 2px solid #8b7355; border-radius: 8px; 
-            padding: 0 45px 0 15px; font-family: 'MedievalSharp', serif; font-size: 1.1em;
-            letter-spacing: 1px; appearance: none; -webkit-appearance: none;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.8); transition: all 0.3s ease;
-        }
-    </style>
+		#historyBar .history-item:first-child {
+    opacity: 1;
+    border: 3px solid #ffa500; /* Keeps your orange border from before */
+    box-shadow: 0 0 10px rgba(255, 165, 0, 0.5);
+}
+
+select { 
+    width: 100%; 
+    height: 55px; /* Matched to your button height */
+    background: #000 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23ffcf67' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat right 15px center;
+    background-size: 20px;
+    color: var(--accent); 
+    border: 2px solid #8b7355; /* Matched to your button border */
+    border-radius: 8px; 
+    padding: 0 45px 0 15px; 
+    font-family: 'MedievalSharp', serif; 
+    font-size: 1.1em;
+    letter-spacing: 1px;
+    appearance: none; /* Removes the default grey iPad arrow */
+    -webkit-appearance: none;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
+    transition: all 0.3s ease;
+}
+
+select:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 15px rgba(255, 207, 103, 0.3);
+}
+
+   </style>
 </head>
 <body onload="initApp()">
 
@@ -189,7 +210,7 @@
     </div>
 
     <div id="footerControls">
-        <span id="versionTag">v1.4.0.0</span>
+        <span id="versionTag">v1.3.0.0</span>
         <button id="menuToggle" onclick="toggleDrawer()"><span class="material-symbols-outlined">settings</span></button>
     </div>
 
@@ -197,7 +218,11 @@
         <div class="drawer-content" onclick="event.stopPropagation()">
             <img src="assets/logo.png" alt="CDMD Logo" class="menu-logo">
             <div class="label" style="text-align: center; font-size: 1.4em; color:#8b0000;">Game Setup</div>
-            <div id="drawerControls" style="display: flex; flex-direction: column; gap:15px;">
+            <div id="setupButtons" style="display:flex; flex-direction:column; gap:10px; font-size:32px;">
+                <button id="connectBtn" onclick="initFolder()">LOAD GAME ASSETS GitHuib</button>
+                <button id="restoreBtn" class="alt-btn" style="display:none;" onclick="restoreFolder()">RESTORE LAST SESSION</button>
+            </div>
+            <div id="drawerControls" style="display:none; flex-direction: column; gap:15px;">
                 <div class="column">
                     <div class="label">Elder One</div>
                     <select id="bossSelect" onchange="loadBoss()"></select>
@@ -255,116 +280,90 @@
     </div>
 
     <script>
-        // --- EMBEDDED DATA ---
-        const GAME_DATA = {
-            "bosses": {
-                "Cthulhu": {
-                    "stage": "assets/bosses/Cthulhu/stages.jpg",
-                    "minion": "assets/bosses/Cthulhu/minions.jpg",
-                    "mythos": "assets/bosses/Cthulhu/mythos.jpg"
-                },
-                "Yog-Sothoth": {
-                    "stage": "assets/bosses/Yog-Sothoth/stages.jpg",
-                    "minion": "assets/bosses/Yog-Sothoth/minions.jpg",
-                    "mythos": "assets/bosses/Yog-Sothoth/mythos.jpg"
-                },
-                "Hastur": {
-                    "stage": "assets/bosses/Hastur/stages.jpg",
-                    "minion": "assets/bosses/Hastur/minions.jpg",
-                    "mythos": "assets/bosses/Hastur/mythos.jpg"
-                },
-                "Bubba": {
-                    "stage": "assets/bosses/Bubba/stages.jpg",
-                    "minion": "assets/bosses/Bubba/minions.jpg",
-                    "mythos": "assets/bosses/Bubba/mythos.jpg"
-                }
-            },
-            "scenarios": {
-                "Fire": {
-                    "scenario": "assets/scenarios/fire/scenario.jpg",
-                    "monster": "assets/scenarios/fire/monsters.jpg",
-                    "mythos": "assets/scenarios/fire/mythos.jpg"
-                },
-                "Ice": {
-                    "scenario": "assets/scenarios/ice/scenario.jpg",
-                    "monster": "assets/scenarios/ice/monsters.jpg",
-                    "mythos": "assets/scenarios/ice/mythos.jpg"
-                }
-            }
-        };
-
+        let folders = { bosses: {}, scenarios: {} };
         let currentBossMythosUrl = "", currentScenarioMythosUrl = "";
         let deck = [], drawnHistory = [], currentStageIdx = 0, symbolCounter = 0;
         let verX = 0, verY = 0;
 
+        function updateVersion(type) {
+            if (type === 'save') verX++;
+            if (type === 'shuffle') verY++;
+            document.getElementById('versionTag').innerText = `v1.3.${verX}.${verY}`;
+        }
+
         function vibrate() { if (window.navigator.vibrate) window.navigator.vibrate(20); }
-        
-        function initApp() { 
-            populateSelectors();
-            toggleDrawer(); 
-        }
+        function initApp() { toggleDrawer(); checkPersistence(); }
 
-        function populateSelectors() {
-            const bSel = document.getElementById('bossSelect');
-            const sSel = document.getElementById('scenarioSelect');
-            
-            Object.keys(GAME_DATA.bosses).forEach(name => bSel.add(new Option(name, name)));
-            Object.keys(GAME_DATA.scenarios).forEach(name => sSel.add(new Option(name, name)));
-            
-            loadBoss();
-            loadScenario();
-        }
+        async function openDB() { return new Promise((res) => { const req = indexedDB.open('CDMD_DB', 1); req.onupgradeneeded = () => req.result.createObjectStore('handles'); req.onsuccess = () => res(req.result); }); }
+        async function saveHandle(handle) { const db = await openDB(); const tx = db.transaction('handles', 'readwrite'); tx.objectStore('handles').put(handle, 'rootFolder'); }
+        async function getSavedHandle() { const db = await openDB(); return new Promise(res => { const req = db.transaction('handles').objectStore('handles').get('rootFolder'); req.onsuccess = () => res(req.result); }); }
+        async function checkPersistence() { const handle = await getSavedHandle(); if (handle) { document.getElementById('connectBtn').style.display = 'none'; document.getElementById('restoreBtn').style.display = 'block'; } }
+        async function restoreFolder() { const handle = await getSavedHandle(); if (await handle.queryPermission({mode: 'readwrite'}) !== 'granted') await handle.requestPermission({mode: 'readwrite'}); processFolder(handle); }
+        async function initFolder() { try { const root = await window.showDirectoryPicker(); await saveHandle(root); processFolder(root); } catch (err) {} }
 
-        function loadBoss() {
-            const name = document.getElementById('bossSelect').value;
-            const data = GAME_DATA.bosses[name];
-            document.getElementById('bossNameTitle').innerText = name;
-            document.getElementById('minionNameTitle').innerText = name;
-            
-            document.getElementById('stageView').dataset.url = data.stage;
-            document.getElementById('minionView').dataset.url = data.minion;
-            currentBossMythosUrl = data.mythos;
-        }
-
-        function loadScenario() {
-            const name = document.getElementById('scenarioSelect').value;
-            const data = GAME_DATA.scenarios[name];
-            document.getElementById('scenarioNameTitle').innerText = name;
-            document.getElementById('monsterNameTitle').innerText = name;
-            
-            document.getElementById('scenarioView').dataset.url = data.scenario;
-            document.getElementById('monsterView').dataset.url = data.monster;
-            currentScenarioMythosUrl = data.mythos;
-        }
-
-        function toggleDrawer() { 
-            const d = document.getElementById('navDrawer'); 
-            d.style.display = (d.style.display === 'flex') ? 'none' : 'flex'; 
-        }
-
+        function toggleDrawer() { const d = document.getElementById('navDrawer'); d.style.display = (d.style.display === 'flex') ? 'none' : 'flex'; }
         function closeDrawer(e) { if(e.target.id === 'navDrawer') toggleDrawer(); }
+
+        async function processFolder(root) {
+            const bSel = document.getElementById('bossSelect'); const sSel = document.getElementById('scenarioSelect');
+            bSel.innerHTML = ''; sSel.innerHTML = '';
+            for await (const entry of root.values()) {
+                if (entry.name.toLowerCase() === 'bosses') {
+                    for await (const b of entry.values()) { folders.bosses[b.name]=b; bSel.add(new Option(b.name,b.name)); }
+                }
+                if (entry.name.toLowerCase() === 'scenarios') {
+                    for await (const s of entry.values()) { folders.scenarios[s.name]=s; sSel.add(new Option(s.name,s.name)); }
+                }
+            }
+            document.getElementById('drawerControls').style.display = 'flex';
+            document.getElementById('setupButtons').style.display = 'none';
+            if (bSel.options.length > 0) loadBoss();
+        }
+
+        async function loadBoss() {
+            const bossName = document.getElementById('bossSelect').value;
+            document.getElementById('bossNameTitle').innerText = bossName;
+            document.getElementById('minionNameTitle').innerText = bossName;
+            const folder = folders.bosses[bossName];
+            for await (const entry of folder.values()) {
+                const file = await entry.getFile(); const url = URL.createObjectURL(file);
+                if (entry.name.toLowerCase().includes('mythos')) currentBossMythosUrl = url;
+                if (entry.name.toLowerCase().includes('stage')) document.getElementById('stageView').dataset.url = url;
+                if (entry.name.toLowerCase().includes('minion')) document.getElementById('minionView').dataset.url = url;
+            }
+            if (Object.keys(folders.scenarios).length > 0) loadScenario();
+        }
+
+        async function loadScenario() {
+            const scenarioName = document.getElementById('scenarioSelect').value;
+            document.getElementById('scenarioNameTitle').innerText = scenarioName;
+            document.getElementById('monsterNameTitle').innerText = scenarioName;
+            const folder = folders.scenarios[scenarioName];
+            for await (const entry of folder.values()) {
+                const file = await entry.getFile(); const url = URL.createObjectURL(file);
+                if (entry.name.toLowerCase().includes('monster')) document.getElementById('monsterView').dataset.url = url;
+                else if (entry.name.toLowerCase().includes('scenario')) document.getElementById('scenarioView').dataset.url = url;
+                else if (entry.name.toLowerCase().includes('mythos')) currentScenarioMythosUrl = url;
+            }
+        }
 
         function commitGameSettings() {
             vibrate();
-            verX++;
-            document.getElementById('versionTag').innerText = `v1.4.${verX}.${verY}`;
+            updateVersion('save');
             document.getElementById('mainContainer').classList.add('active');
             ['stageView', 'minionView', 'monsterView', 'scenarioView'].forEach(id => {
-                const el = document.getElementById(id);
-                if(el.dataset.url) el.style.backgroundImage = `url('${el.dataset.url}')`;
+                const el = document.getElementById(id); if(el.dataset.url) el.style.backgroundImage = `url('${el.dataset.url}')`;
             });
             initDeck(); setStage(0); toggleDrawer();
         }
 
-        function initDeck() {
+        async function initDeck() {
             vibrate();
-            verY++;
-            document.getElementById('versionTag').innerText = `v1.4.${verX}.${verY}`;
-            
+
+            updateVersion('shuffle');
             const historyBar = document.getElementById('historyBar');
             const mythosView = document.getElementById('mythosView');
             const items = Array.from(historyBar.children);
-
             if (items.length > 0) {
                 new Audio('assets/flip.mp3').play().catch(() => {});
                 items.forEach((item, index) => {
@@ -372,18 +371,23 @@
                         const rect = item.getBoundingClientRect();
                         const deckRect = mythosView.getBoundingClientRect();
                         item.style.opacity = '0';
+
                         const flyer = document.createElement('div');
                         flyer.className = 'history-item';
                         flyer.style.cssText = `position:fixed; top:${rect.top}px; left:${rect.left}px; width:${rect.width}px; height:${rect.height}px; z-index:5000; background-image:url('assets/mythoscardback.jpg'); background-size:cover; pointer-events:none; transition: all 0.6s cubic-bezier(0.25, 0.1, 0.25, 1);`;
                         document.body.appendChild(flyer);
-                        requestAnimationFrame(() => {
-                            requestAnimationFrame(() => {
-                                flyer.style.top = deckRect.top + 100 + 'px';
-                                flyer.style.left = deckRect.left + 70 + 'px';
-                                flyer.style.transform = `scale(${deckRect.width / rect.width}) rotate(720deg)`;
-                                flyer.style.opacity = '1';
-                            });
-                        });
+
+					// First frame: Element is added to the DOM at the starting 'rect' position
+					requestAnimationFrame(() => {
+						
+						// Second frame: Browser has rendered the start; now we trigger the move
+						requestAnimationFrame(() => {
+							flyer.style.top = deckRect.top + 100 + 'px';
+							flyer.style.left = deckRect.left + 70 + 'px';
+							flyer.style.transform = `scale(${deckRect.width / rect.width}) rotate(720deg)`;
+							flyer.style.opacity = '1';
+						});
+					});
                         setTimeout(() => flyer.remove(), 700);
                     }, index * 60);
                 });
@@ -421,7 +425,6 @@
             vibrate();
             const c = deck.pop(); drawnHistory.push(c);
             const currentIdx = drawnHistory.length - 1;
-            
             if (deck.length === 0) {
                 new Audio('assets/enddraw.mp3').play().catch(() => {});
                 document.getElementById('drawBtn').disabled = true;
@@ -429,7 +432,6 @@
 
             const mythosView = document.getElementById('mythosView');
             applyStyle(mythosView, c);
-            
             const item = document.createElement('div');
             item.className = 'history-item'; applyStyle(item, c);
             item.onclick = (e) => { e.stopPropagation(); showHistoryZoom(currentIdx); };
@@ -493,40 +495,13 @@
             next.style.display = (currentStageIdx === 3) ? 'none' : 'flex';
         }
 
-		function setStage(idx) { 
-			vibrate(); 
-			
-			// --- ADD THIS LINE ---
-			new Audio('assets/flip.mp3').play().catch(() => {}); 
-			// ---------------------
-
-			currentStageIdx = idx; 
-			document.getElementById('stageView').style.backgroundPosition = `0% ${[100, 66.66, 33.33, 0][idx]}%`; 
-			updateStageNav();
-		}
-		
-		function changeStage(dir) { 
-			let n = currentStageIdx + dir; 
-			if (n >= 0 && n < 4) {
-				// 1. Play the sound
-				new Audio('assets/stager.mp3').play().catch(() => {}); 
-				
-				// 2. Trigger the visual flash
-				const stageView = document.getElementById('stageView');
-				stageView.classList.remove('flash-effect');
-				void stageView.offsetWidth; 
-				stageView.classList.add('flash-effect');
-
-				// 3. Update the intensity variable (n will be 0, 1, 2, or 3)
-				document.documentElement.style.setProperty('--boss-intensity', n);
-
-				setStage(n); 
-			}
-}
-
-    
-	
-	
-	</script>
+        function setStage(idx) { 
+            vibrate(); 
+            currentStageIdx = idx; 
+            document.getElementById('stageView').style.backgroundPosition = `0% ${[100, 66.66, 33.33, 0][idx]}%`; 
+            updateStageNav();
+        }
+        function changeStage(dir) { let n = currentStageIdx + dir; if (n >= 0 && n < 4) setStage(n); }
+    </script>
 </body>
 </html>
