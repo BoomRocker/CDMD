@@ -217,10 +217,13 @@
         <div id="previewCard"></div>
     </div>
 
-    <div id="footerControls">
-        <span id="versionTag">v1.4.0.0</span>
-        <button id="menuToggle" onclick="toggleDrawer()"><span class="material-symbols-outlined">settings</span></button>
-    </div>
+	<div id="footerControls">
+			<div style="display: flex; align-items: center; gap: 8px;">
+				<img src="assets/logo.png" alt="Logo" style="height: 60px; width: auto; opacity: 0.7; filter: drop-shadow(0 0 2px #000);">
+				<span id="versionTag" style="width: auto", font-size: 0.75em; opacity: 0.6; font-family: 'Caudex', serif;">v1.4.0.0</span>
+			</div>
+			<button id="menuToggle" onclick="toggleDrawer()"><span class="material-symbols-outlined">settings</span></button>
+		</div>
 
     <div id="navDrawer" onclick="closeDrawer(event)">
         <div class="drawer-content" onclick="event.stopPropagation()">
