@@ -36,6 +36,43 @@
             width: 340px; padding: 25px; display: flex; flex-direction: column; gap: 20px;
             box-shadow: 0 0 30px rgba(0,0,0,0.8);
         }
+		
+		/* Version Label Styling */
+		.version-container {
+			position: fixed;
+			bottom: 27px; /* Centered vertically with the 55px menu button */
+			right: 85px;  /* 20px margin + 55px button width + 10px gap */
+			display: flex;
+			align-items: center;
+			gap: 6px;
+			background: rgba(0, 0, 0, 0.5);
+			padding: 2px 10px;
+			border-radius: 4px;
+			border: 1px solid rgba(255, 207, 103, 0.2);
+			z-index: 1000;
+			pointer-events: none;
+		}
+
+		.version-logo-small {
+			width: auto;
+			height: 32px;
+			filter: drop-shadow(0 0 2px rgba(0,0,0,0.5));
+		}
+
+		.version-number {
+			font-family: 'MedievalSharp', serif;
+			font-size: 0.75em;
+			color: var(--accent);
+			letter-spacing: 0.5px;
+		}
+
+		/* Red Menu Header */
+		.setup-header-red {
+			text-align: center; 
+			font-size: 1.4em;
+			color: #ff4444 !important; /* Overriding var(--accent) */
+			text-shadow: 2px 2px 4px #000;
+		}
 
         #mainContainer { display: none; padding: 15px; flex-grow: 1; flex-direction: column; gap: 10px; width: 100vw; box-sizing: border-box; }
         #mainContainer.active { display: flex; }
@@ -127,24 +164,60 @@
         .symbol-btn { background: linear-gradient(#642800, #3d1a00); }
         
         #countDisplay { color: #aaa; font-size: 0.8em; margin: 2px 0; }
-        select { width: 100%; height: 45px; background: #000; color: var(--accent); border: 1px solid #444; border-radius: 6px; padding: 0 10px; font-family: 'Caudex'; }
-    </style>
+		select {
+			width: 100%;
+			height: 45px;
+			background-color: #333 !important;
+			color: #fff !important; /* var(--accent) */
+			border: 1px solid #444 !important;
+			border-radius: 6px;
+			padding: 0 40px 0 12px !important;
+			font-family: 'Caudex', serif;
+			font-size: 22px;
+			cursor: pointer;
+
+			/* 1. Remove ALL default browser styling */
+			appearance: none !important;
+			-webkit-appearance: none !important;
+			-moz-appearance: none !important;
+
+			/* 2. Layer the Arrow over the Background */
+			background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ffcf67'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e") !important;
+			background-repeat: no-repeat !important;
+			background-position: calc(100% - 12px) center !important;
+			background-size: 18px !important;
+		}
+
+		/* 3. Fix for IE/Edge to hide default arrow */
+		select::-ms-expand {
+			display: none;
+		}
+
+		select:hover {
+			border-color: #ffcf67 !important;
+		}
+   </style>
 </head>
 <body onload="initApp()">
 
     <div id="previewOverlay" onclick="this.style.display='none'">
         <div id="previewCard"></div>
     </div>
+	
+	<div class="version-container">
+    <img src="assets/logo.png" class="version-logo-small" alt="icon">
+    <span class="version-number">1.2.5</span>
+	</div>
 
     <button id="menuToggle" onclick="toggleDrawer()"><span class="material-symbols-outlined">settings</span></button>
 
     <div id="navDrawer" onclick="closeDrawer(event)">
         <div class="drawer-content" onclick="event.stopPropagation()">
             <img src="assets/logo.png" alt="CDMD Logo" class="menu-logo">
-            <div class="label" style="text-align: center; font-size: 1.4em;">Game Setup</div>
+            <div class="label" style="text-align: center; font-size: 1.4em; color:red;">Game Setup</div>
             <div id="setupButtons" style="display:flex; flex-direction:column; gap:10px;">
-                <button id="connectBtn" onclick="initFolder()">LOAD GAME ASSETS</button>
-                <button id="restoreBtn" class="alt-btn" style="display:none;" onclick="restoreFolder()">RESTORE LAST SESSION</button>
+                <button id="connectBtn" onclick="initFolder()" style="font-size:22px;">LOAD GAME ASSETS</button>
+                <button id="restoreBtn" class="alt-btn" style="display:none; font-size:22px;" onclick="restoreFolder()">RESTORE LAST SESSION</button>
             </div>
             <div id="drawerControls" style="display:none; flex-direction: column; gap:15px;">
                 <div class="column">
@@ -155,7 +228,7 @@
                     <div class="label">Scenario</div>
                     <select id="scenarioSelect" onchange="loadScenario()"></select>
                 </div>
-                <button class="primary-btn" onclick="commitGameSettings()" style="background: #2e7d32; font-size: 1.2em; border-color: #4caf50;">SAVE & PLAY</button>
+                <button class="primary-btn" onclick="commitGameSettings()" style="background: #2e7d32; font-size: 1.2em; border-color: #4caf50; font-size:22px;">SAVE & PLAY</button>
             </div>
         </div>
     </div>
