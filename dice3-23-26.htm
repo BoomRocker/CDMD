@@ -13,10 +13,9 @@
         :root { 
             --accent: #ffcf67; 
             --bright-green: #2ecc71; 
-            /* Swapped these two colors below */
-            --succ-color: #27ae60; 
+            --succ-color: #ffcf67; 
             --tent-color: #e74c3c; 
-            --elde-color: #ffcf67; 
+            --elde-color: #27ae60; 
             --border-gold: #8b7355;
         }
         
@@ -149,14 +148,12 @@
         .report-label-row { display: flex; align-items: center; gap: 6px; font-size: .85em; }
         .report-icon { width: 22px; height: 22px; }
         .report-icon img { width: 100%; height: 100%; object-fit: contain; }
-        
-        /* Updated individual classes for the icons specifically */
-        .succ img { filter: sepia(1) saturate(5) hue-rotate(90deg); } /* Green filter */
-        .elde img { filter: sepia(1) saturate(5) hue-rotate(-15deg); } /* Yellow filter */
-
+        .succ{color:#ffcf67;}
+        .elde{color:#27ae60;}
+        .report{color:#e74c3c;}
+        .succ img { filter: sepia(1) saturate(5) hue-rotate(-15deg); }
+        .elde img { filter: sepia(1) saturate(5) hue-rotate(90deg); }
         .report span[id*="res"] { font-weight: bold; font-size: 2.4em; line-height: 1; }
-        
-        /* CSS Variables now control the swapped colors */
         .report-label-row.succ, span#resSuccess { color: var(--succ-color); }
         .report-label-row.tent, span#resTentacle { color: var(--tent-color); }
         .report-label-row.elde, span#resElder { color: var(--elde-color); }
@@ -198,26 +195,26 @@
         </button>
 
         <div class="report">
-            <div class="elde">
-                <div class="report-label-row elde">
-                    <div class="report-icon"><img src="assets/dice/elder-white.svg"></div>
-                    <span>ELDER</span>
+            <div class="succ">
+                <div class="report-label-row">
+                    <div class="report-icon"><img src="assets/dice/success-white.svg"></div>
+                    <span>SUCCESS</span>
                 </div>
-                <span id="resElder">0</span>
+                <span id="resSuccess">0</span>
             </div>
             <div class="tent">
-                <div class="report-label-row tent">
+                <div class="report-label-row">
                     <div class="report-icon"><img src="assets/dice/tentacle-white.svg"></div>
                     <span>INSANITY</span>
                 </div>
                 <span id="resTentacle">0</span>
             </div>
-            <div class="succ">
-                <div class="report-label-row succ">
-                    <div class="report-icon"><img src="assets/dice/success-white.svg"></div>
-                    <span>SUCCESS</span>
+            <div class="elde">
+                <div class="report-label-row">
+                    <div class="report-icon"><img src="assets/dice/elder-white.svg"></div>
+                    <span>ELDER</span>
                 </div>
-                <span id="resSuccess">0</span>
+                <span id="resElder">0</span>
             </div>
         </div>
     </div>
@@ -233,24 +230,20 @@
         let results = []; 
         const rollSound = new Audio('assets/dice.mp3');
 
-        const faceFiles = { 
-            success: 'success-white.svg', 
-            tentacle: 'tentacle-white.svg', 
-            both: 'success-tentacle-white.svg', 
-            elder: 'elder-white.svg', 
-            eldeSuccess: 'success-elder-white.svg',
-            blank: '' 
-        };
-        
+        const faceFiles = { success: 'success-white.svg', tentacle: 'tentacle-white.svg', both: 'success-tentacle-white.svg', elder: 'elder-white.svg', blank: '' };
         const blackPool = ['both', 'elder', 'success', 'success', 'tentacle', 'blank'];
-        const greenPool = ['eldeSuccess', 'elder', 'success', 'blank', 'success', 'blank'];
+        const greenPool = ['both', 'elder', 'success', 'blank', 'success', 'blank'];
 
+        // logic: notify parent shell to update other frames
         function selectChar(i) {
             if (!investigators[i]) return;
+            // Notify parent shell so Investigators tab follows
             window.parent.postMessage({ type: 'TAB_SHIFT', index: i }, '*');
+            // Apply visual changes locally
             applyDiceUIState(i);
         }
 
+        // logic: update local UI only (used when triggered remotely)
         function applyDiceUIState(i) {
             if (!investigators[i]) return;
             activeIdx = i;
@@ -342,7 +335,6 @@
                 if (res === 'tentacle') t++;
                 if (res === 'elder') e++;
                 if (res === 'both') { s++; t++; }
-                if (res === 'eldeSuccess') { s++; e++; } 
             });
             document.getElementById('resSuccess').innerText = s;
             document.getElementById('resTentacle').innerText = t;
@@ -351,10 +343,13 @@
 
         function toggleHold(el) { el.classList.toggle('held'); }
 
+        // --- SYNC LOGIC ---
         window.addEventListener('message', function(event) {
             if (event.data.type === 'SYNC_PARTY') {
+                // If we are already mid-session, don't reset to P1
                 buildDiceTabs(event.data.party, activeIdx);
             }
+            
             if (event.data.type === 'SET_ACTIVE_TAB') {
                 applyDiceUIState(event.data.index);
             }
@@ -367,6 +362,7 @@
             if (!container) return;
             container.innerHTML = ''; 
 
+            // Preserving counts if they exist in current session
             investigators = partyItems.map((item, idx) => {
                 const existing = investigators[idx];
                 return {
@@ -385,6 +381,7 @@
                 container.appendChild(btn);
             });
 
+            // Use the saved index instead of defaulting to 0
             if (investigators.length > 0) applyDiceUIState(savedIndex);
         }
     </script>

@@ -15,7 +15,6 @@
             font-family: 'Caudex', serif; display: flex; flex-direction: column; overflow: hidden;
         }
 
-        /* SETUP SCREEN & GALLERY */
         #setupScreen {
             position: fixed; inset: 0; z-index: 1000;
             background: #0a0a0a; display: flex; flex-direction: column; align-items: center;
@@ -23,19 +22,19 @@
         }
         .gallery {
             display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-            gap: 15px; width: 100%; max-width: 900px; margin-top: 20px;
+            gap: 10px; width: 100%; max-width: auto; margin-top: 10px;
         }
         .thumb-container { display: flex; flex-direction: column; align-items: center; gap: 5px; }
         .thumb {
-            width: 100%; aspect-ratio: 1; border: 2px solid #333; border-radius: 8px;
+            width: 100%; aspect-ratio: 1; 
+            border: 3px solid #333; 
+            border-radius: 8px;
             background-size: cover; background-position: center; cursor: pointer; 
-            transition: transform 0.2s, border-color 0.2s;
+            transition: all 0.2s ease;
+            box-sizing: border-box;
         }
         .thumb:active { transform: scale(0.95); }
-        .thumb.selected { border-color: var(--accent); box-shadow: 0 0 15px var(--accent); }
-        .thumb-name { font-family: 'MedievalSharp'; font-size: 0.8em; color: #888; text-align: center; }
 
-        /* PREVIEW POPUP */
         #previewOverlay {
             position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000;
             display: none; justify-content: center; align-items: center; pointer-events: none;
@@ -43,25 +42,80 @@
         #previewOverlay img { max-width: 90%; max-height: 90%; border: 3px solid var(--gold); border-radius: 10px; }
 
         .start-btn {
-            margin: 40px 0; padding: 15px 50px; font-family: 'MedievalSharp';
+            margin: 0px 0; padding: 10px 50px; font-family: 'MedievalSharp';
             background: #1a3c4a; color: white; border: 1px solid var(--accent);
             border-radius: 4px; cursor: pointer; font-size: 1.4em;
         }
 
-        /* ACTIVE GAME UI */
+        /* --- HEADER BAR --- */
         .investigator-bar {
-            display: flex; gap: 10px; width: 100%; padding: 10px;
-            background: #000; border-bottom: 2px solid #333; 
-            overflow-x: auto; box-sizing: border-box; flex-shrink: 0;
+            display: flex; 
+            align-items: center;
+            justify-content: space-between;
+            width: 100%; 
+            padding: 8px 12px;
+            background: #000; 
+            border-bottom: 2px solid #333; 
+            box-sizing: border-box; 
+            flex-shrink: 0;
+            height: 60px;
         }
+
+        .tab-wrapper {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            flex-grow: 1;
+        }
+        .tab-wrapper::-webkit-scrollbar { display: none; }
+
         .char-tab {
-            padding: 12px 24px; background: #111; border: 1px solid #444; 
+            padding: 10px 20px; background: #111; border: 1px solid #444; 
             border-radius: 4px; color: #666; font-family: 'MedievalSharp'; 
             cursor: pointer; white-space: nowrap; font-size: 1em;
+            transition: all 0.3s ease;
         }
-        .char-tab.active { background: #1a3c4a; border-color: var(--accent); color: white; }
 
-        /* MAXIMIZED BOARD */
+        /* --- HEADER BUTTONS --- */
+        .header-actions { display: flex; align-items: center; gap: 8px; }
+
+        .btn-reset { 
+            background: rgba(40, 20, 20, 0.9); 
+            border: 1px solid #633; 
+            color: #a66; 
+            padding: 6px 12px; 
+            border-radius: 4px; 
+            font-family: 'MedievalSharp'; 
+            cursor: pointer;
+            white-space: nowrap;
+            font-size: 0.8em;
+        }
+
+        /* --- TRASH DROP ZONE (HEADER) --- */
+        #trashZone {
+            width: 80px;
+            height: 34px;
+            background: rgba(139, 26, 26, 0.2);
+            border: 1px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: rgba(255, 255, 255, 0.4);
+            font-family: 'MedievalSharp';
+            font-size: 0.7em;
+            text-align: center;
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+        #trashZone.active { 
+            background: #8b1a1a; 
+            border-color: #fff; 
+            color: #fff; 
+            transform: scale(1.1);
+        }
+
         #boardContainer {
             position: relative; flex-grow: 1; width: 100vw;
             background-repeat: no-repeat; background-position: center center;
@@ -69,33 +123,40 @@
         }
 
         .token {
-            position: absolute; width: 42px; height: 42px;
-            border: 2px solid rgba(255,255,255,0.9); border-radius: 50%; 
-            z-index: 100; touch-action: none; box-sizing: border-box;
-        }
-
-        .btn-reset { 
-            position: fixed; bottom: 20px; right: 20px; background: rgba(20,20,20,0.9); 
-            border: 1px solid #444; color: #555; padding: 10px; border-radius: 5px; 
-            font-family: 'MedievalSharp'; cursor: pointer; z-index: 500; 
+            position: absolute;
+            width: 88px; 
+            height: 88px;
+            cursor: move;
+            z-index: 100;
+            touch-action: none;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.8));
+            transform: translate(-50%, -50%);
         }
     </style>
 </head>
 <body>
 
     <div id="setupScreen">
-        <h1 style="font-family: 'MedievalSharp'; color: var(--accent); margin-bottom: 0;">Party Selection</h1>
-        <p style="color: #666; font-style: italic;">Tap to select • Hold to preview board</p>
+        <h1 style="font-family: 'MedievalSharp'; color: var(--accent); margin: 0 0 10px 0;">Select the Investigators</h1>
         <div class="gallery" id="gallery"></div>
-        <button class="start-btn" onclick="startGame()">Begin Ritual</button>
+        <button class="start-btn" onclick="startGame()" style="margin-top: 20px;">Begin Investigation</button>
+        <p style="color: #666; font-style: italic; margin-top: 10px;">Tap to select • Hold to preview board</p>
     </div>
 
     <div id="previewOverlay"><img id="previewImg" src=""></div>
 
-    <div class="investigator-bar" id="charBar"></div>
-    <div class="board-container" id="boardContainer" onmousedown="handleBoardClick(event)" ontouchstart="handleBoardClick(event)"></div>
+    <div class="investigator-bar">
+        <div class="tab-wrapper" id="charBar"></div>
+        <div class="header-actions">
+            <div id="trashZone">TRASH</div>
+            <button class="btn-reset" onclick="confirmReset()">Reset Party</button>
+        </div>
+    </div>
 
-    <button class="btn-reset" onclick="location.reload()">Reset Session</button>
+    <div id="boardContainer" onmousedown="handleBoardClick(event)" ontouchstart="handleBoardClick(event)"></div>
 
     <script>
         const totalImages = 29;
@@ -103,17 +164,24 @@
         let activeMemberIdx = 0;
         let partyData = {}; 
         let previewTimer;
+        
+        // Added Audio Object
+        const trashSound = new Audio('assets/trash.mp3');
 
-        const tokenColors = [
-            'radial-gradient(circle at 30% 30%, #ff4444, #8b0000)', // Red
-            'radial-gradient(circle at 30% 30%, #44ff44, #006400)', // Green
-            'radial-gradient(circle at 30% 30%, #4444ff, #00008b)', // Blue
-            'radial-gradient(circle at 30% 30%, #ffff44, #8b8b00)', // Yellow
-            'radial-gradient(circle at 30% 30%, #ff44ff, #8b008b)', // Purple
-            'radial-gradient(circle at 30% 30%, #ff8c00, #ff4500)'  // Orange
+        const STARTING_POSITIONS = [
+            { x: 4.5,  y: 8.5 },
+            { x: 7.5,  y: 77.5 },
+            { x: 7.5,  y: 89.5 },
+            { x: 57.5, y: 33.5 },
+            { x: 57.5, y: 62.5 },
+            { x: 57.5, y: 88.5 }
         ];
 
-        // 1. Build Gallery with Long-Press Preview
+        const investigatorThemes = [
+            { hex: '#8b1a1a' }, { hex: '#1a4a35' }, { hex: '#1a335a' }, 
+            { hex: '#7a5a1a' }, { hex: '#4a1a5a' }, { hex: '#2c3e50' }
+        ];
+
         const gallery = document.getElementById('gallery');
         const overlay = document.getElementById('previewOverlay');
         const pImg = document.getElementById('previewImg');
@@ -121,51 +189,100 @@
         for (let i = 0; i < totalImages; i++) {
             const container = document.createElement('div');
             container.className = 'thumb-container';
-
             const div = document.createElement('div');
             div.className = 'thumb';
+            div.id = `thumb-${i}`;
             div.style.backgroundImage = `url('assets/investigators/investigator (${i}).jpg')`;
             
-            // Hold to Preview Logic
-            const showPreview = () => {
-                pImg.src = `assets/investigators/investigator (${i}).jpg`;
-                overlay.style.display = 'flex';
-            };
+            const showPreview = () => { pImg.src = `assets/investigators/investigator (${i}).jpg`; overlay.style.display = 'flex'; };
             const hidePreview = () => { overlay.style.display = 'none'; };
 
             div.onmousedown = () => { previewTimer = setTimeout(showPreview, 500); };
             div.onmouseup = () => { clearTimeout(previewTimer); hidePreview(); };
             div.ontouchstart = () => { previewTimer = setTimeout(showPreview, 500); };
             div.ontouchend = () => { clearTimeout(previewTimer); hidePreview(); };
-
-            div.onclick = () => {
-                if (selectedIndices.includes(i)) {
-                    selectedIndices = selectedIndices.filter(item => item !== i);
-                    div.classList.remove('selected');
-                } else {
-                    selectedIndices.push(i);
-                    div.classList.add('selected');
-                }
-            };
-
-            const label = document.createElement('div');
-            label.className = 'thumb-name';
-            label.innerText = `ID #${i}`;
+            div.onclick = () => { toggleSelection(i, div); };
 
             container.appendChild(div);
-            container.appendChild(label);
             gallery.appendChild(container);
         }
 
-        // 2. Start Game
+        function toggleSelection(idx, element) {
+            const existingIdx = selectedIndices.indexOf(idx);
+            if (existingIdx > -1) {
+                selectedIndices.splice(existingIdx, 1);
+            } else if (selectedIndices.length < 6) {
+                selectedIndices.push(idx);
+            }
+            refreshGalleryHighlights();
+        }
+
+        function refreshGalleryHighlights() {
+            document.querySelectorAll('.thumb').forEach(t => {
+                t.style.borderColor = "#333";
+                t.style.boxShadow = "none";
+            });
+            selectedIndices.forEach((imgIdx, orderIdx) => {
+                const thumb = document.getElementById(`thumb-${imgIdx}`);
+                const theme = investigatorThemes[orderIdx % investigatorThemes.length];
+                thumb.style.borderColor = theme.hex;
+                thumb.style.boxShadow = `0 0 15px ${theme.hex}`;
+            });
+        }
+
         function startGame() {
             if (selectedIndices.length === 0) return alert("Select your party first.");
+            
+            // Prime the audio for mobile
+            trashSound.play().then(() => { trashSound.pause(); trashSound.currentTime = 0; }).catch(e => {});
+            
             document.getElementById('setupScreen').style.display = 'none';
+            
             selectedIndices.forEach((idx, i) => {
-                partyData[idx] = { tokens: [], color: tokenColors[i % tokenColors.length] }; 
+                const theme = investigatorThemes[i % investigatorThemes.length];
+                partyData[idx] = { 
+                    tokens: [], 
+                    color: theme.hex,
+                    playerNum: i + 1 
+                }; 
+                
+                STARTING_POSITIONS.forEach(pos => {
+                    partyData[idx].tokens.push({
+                        leftPct: pos.x,
+                        topPct: pos.y,
+                        pNum: i + 1
+                    });
+                });
             });
+
+            window.parent.postMessage({ 
+                type: 'PARTY_CONFIRMED', 
+                party: selectedIndices.map(idx => ({ id: idx, color: partyData[idx].color })) 
+            }, '*');
+
+            applyUIState();
+        }
+
+        function confirmReset() {
+            if (confirm("Are you sure you want to reset the session? This will clear all party data and tokens.")) {
+                location.reload();
+            }
+        }
+
+        function selectMember(arrayIdx) {
+            if (arrayIdx === activeMemberIdx) return;
+            saveCurrentTokens();
+            activeMemberIdx = arrayIdx;
+            window.parent.postMessage({ type: 'TAB_SHIFT', index: arrayIdx }, '*');
+            applyUIState();
+        }
+
+        function applyUIState() {
+            const imgIdx = selectedIndices[activeMemberIdx];
+            if (imgIdx === undefined) return;
+            document.getElementById('boardContainer').style.backgroundImage = `url('assets/investigators/investigator (${imgIdx}).jpg')`;
             renderTabs();
-            selectMember(0);
+            loadTokens(imgIdx);
         }
 
         function renderTabs() {
@@ -173,83 +290,120 @@
             bar.innerHTML = '';
             selectedIndices.forEach((imgIdx, arrayIdx) => {
                 const btn = document.createElement('button');
-                btn.className = `char-tab ${arrayIdx === activeMemberIdx ? 'active' : ''}`;
-                btn.innerText = `Investigator ${arrayIdx + 1}`;
+                const isSelected = arrayIdx === activeMemberIdx;
+                const myColor = partyData[imgIdx].color;
+                btn.className = `char-tab`;
+                btn.innerText = `P${arrayIdx + 1}`;
+                if (isSelected) {
+                    btn.style.background = myColor;
+                    btn.style.borderColor = "#fff";
+                    btn.style.color = "#fff";
+                    btn.style.boxShadow = `0 0 15px ${myColor}aa`;
+                }
                 btn.onclick = (e) => { e.stopPropagation(); selectMember(arrayIdx); };
                 bar.appendChild(btn);
             });
         }
 
-        function selectMember(arrayIdx) {
-            saveCurrentTokens();
-            activeMemberIdx = arrayIdx;
-            const imgIdx = selectedIndices[arrayIdx];
-            const container = document.getElementById('boardContainer');
-            container.style.backgroundImage = `url('assets/investigators/investigator (${imgIdx}).jpg')`;
-            renderTabs();
-            loadTokens(imgIdx);
-        }
-
-        // 3. Token Logic
         function handleBoardClick(e) {
             if (e.target.classList.contains('token')) return;
-            const rect = document.getElementById('boardContainer').getBoundingClientRect();
+            const container = document.getElementById('boardContainer');
+            const rect = container.getBoundingClientRect();
             const clientX = e.touches ? e.touches[0].clientX : e.clientX;
             const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-            createToken(clientX - rect.left - 21, clientY - rect.top - 21);
+            
+            const xPct = ((clientX - rect.left) / rect.width) * 100;
+            const yPct = ((clientY - rect.top) / rect.height) * 100;
+            createToken(xPct, yPct, null, true);
         }
 
-        function createToken(x, y) {
+        function createToken(x, y, pNumOverride = null, isPct = true) {
             const currentImgIdx = selectedIndices[activeMemberIdx];
+            if (currentImgIdx === undefined) return;
+            const pNum = pNumOverride || partyData[currentImgIdx].playerNum;
             const token = document.createElement('div');
             token.className = 'token';
-            token.style.left = x + 'px';
-            token.style.top = y + 'px';
-            token.style.background = partyData[currentImgIdx].color;
+            token.setAttribute('data-player', pNum);
+            token.style.backgroundImage = `url('assets/investigators/p${pNum}.png')`;
             
-            const glowMatch = partyData[currentImgIdx].color.match(/#[a-f\d]{6}|[a-z]+/gi);
-            token.style.boxShadow = `0 0 15px ${glowMatch[1]}, 0 4px 10px rgba(0,0,0,0.8)`;
+            token.style.left = isPct ? x + '%' : x + 'px';
+            token.style.top = isPct ? y + '%' : y + 'px';
 
             token.onmousedown = (e) => startDrag(e, token);
             token.ontouchstart = (e) => startDrag(e, token);
-            token.ondblclick = (e) => { e.stopPropagation(); token.remove(); };
-            
+            token.oncontextmenu = (e) => { e.preventDefault(); token.remove(); saveCurrentTokens(); };
             document.getElementById('boardContainer').appendChild(token);
         }
 
         function startDrag(e, el) {
             e.preventDefault(); e.stopPropagation();
             const container = document.getElementById('boardContainer');
+            const trash = document.getElementById('trashZone');
             const rect = container.getBoundingClientRect();
+            
+            trash.classList.add('active');
+
             const move = (me) => {
                 const cx = me.touches ? me.touches[0].clientX : me.clientX;
                 const cy = me.touches ? me.touches[0].clientY : me.clientY;
-                el.style.left = (cx - rect.left - 21) + 'px';
-                el.style.top = (cy - rect.top - 21) + 'px';
+                el.style.left = (((cx - rect.left) / rect.width) * 100) + '%';
+                el.style.top = (((cy - rect.top) / rect.height) * 100) + '%';
             };
-            const stop = () => {
+
+            const stop = (se) => {
                 window.removeEventListener('mousemove', move);
                 window.removeEventListener('touchmove', move);
+                trash.classList.remove('active');
+
+                const clientY = se.changedTouches ? se.changedTouches[0].clientY : se.clientY;
+                const clientX = se.changedTouches ? se.changedTouches[0].clientX : se.clientX;
+                const trashRect = trash.getBoundingClientRect();
+
+                if (clientX >= trashRect.left && clientX <= trashRect.right &&
+                    clientY >= trashRect.top && clientY <= trashRect.bottom) {
+                    
+                    // Trigger Sound
+                    trashSound.currentTime = 0;
+                    trashSound.play().catch(e => {});
+                    
+                    el.remove();
+                }
+                
+                saveCurrentTokens(); 
             };
+
             window.addEventListener('mousemove', move);
             window.addEventListener('touchmove', move);
-            window.addEventListener('mouseup', stop);
-            window.addEventListener('touchend', stop);
+            window.addEventListener('mouseup', stop, { once: true });
+            window.addEventListener('touchend', stop, { once: true });
         }
 
         function saveCurrentTokens() {
-            if (selectedIndices.length === 0) return;
             const currentImgIdx = selectedIndices[activeMemberIdx];
+            if (currentImgIdx === undefined) return;
             const tokens = document.querySelectorAll('.token');
-            partyData[currentImgIdx].tokens = Array.from(tokens).map(t => ({ left: t.style.left, top: t.style.top }));
+            partyData[currentImgIdx].tokens = Array.from(tokens).map(t => ({ 
+                leftPct: parseFloat(t.style.left), 
+                topPct: parseFloat(t.style.top),
+                pNum: t.getAttribute('data-player')
+            }));
         }
 
         function loadTokens(imgIdx) {
             document.querySelectorAll('.token').forEach(t => t.remove());
-            (partyData[imgIdx].tokens || []).forEach(pos => {
-                createToken(parseFloat(pos.left), parseFloat(pos.top));
-            });
+            const saved = partyData[imgIdx].tokens || [];
+            saved.forEach(pos => createToken(pos.leftPct, pos.topPct, pos.pNum, true));
         }
+
+        window.addEventListener('message', function(event) {
+            if (event.data.type === 'SET_ACTIVE_TAB') {
+                if (activeMemberIdx !== event.data.index) {
+                    saveCurrentTokens();
+                    activeMemberIdx = event.data.index;
+                    applyUIState();
+                }
+            }
+        });
     </script>
 </body>
 </html>
