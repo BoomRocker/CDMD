@@ -1,17 +1,42 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>CDMD Companion</title>
+
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="CDMD Dice">
+    <meta name="mobile-web-app-capable" content="yes">
+
+    <link rel="icon" type="image/png" href="assets/dice/elder-white.svg">
+    <link rel="apple-touch-icon" href="assets/dice/elder-white.svg">
+    
     <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap" rel="stylesheet">
+    
     <style>
-        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #000; font-family: sans-serif; }
+        body, html { 
+            margin: 0; 
+            padding: 0; 
+            height: 100%; 
+            overflow: hidden; 
+            background: #000; 
+            font-family: sans-serif; 
+            /* Prevents accidental pull-to-refresh on iPad */
+            overscroll-behavior-y: contain; 
+        }
         
         /* Navigation Bar */
         .nav-bar {
-            display: flex; background: #0a0a0a; border-bottom: 2px solid #333;
-            height: 60px; position: relative; z-index: 100;
+            display: flex; 
+            background: #0a0a0a; 
+            border-bottom: 2px solid #333;
+            height: 60px; 
+            position: relative; 
+            z-index: 100;
+            /* Extra padding for iPad notch/status bar area */
+            padding-top: env(safe-area-inset-top);
         }
         .nav-btn {
             flex: 1; border: none; background: none; font-family: 'MedievalSharp', cursive;
@@ -66,36 +91,27 @@
             targetBtn.classList.add('active');
             targetFrame.classList.add('active');
 
-            // Force a sync update to the dice frame when switching to it
             if (app === 'dice' && currentParty.length > 0) {
                 targetFrame.contentWindow.postMessage({ type: 'SYNC_PARTY', party: currentParty }, '*');
             }
         }
 
-        // Bridge Logic: Traffic Controller for all frames
         window.addEventListener('message', function(event) {
-            // 1. PARTY SYNC: From Investigator Frame to store the selected team
             if (event.data.type === 'PARTY_CONFIRMED') {
                 currentParty = event.data.party;
-                console.log("Main Shell: Party Captured", currentParty);
-                
-                // Immediately update Dice frame
                 const diceFrame = document.getElementById('diceFrame').contentWindow;
                 diceFrame.postMessage({ type: 'SYNC_PARTY', party: currentParty }, '*');
             }
 
-            // 2. INITIAL LOAD: When a frame loads, it asks for the data
             if (event.data.type === 'REQUEST_SYNC') {
                 if (currentParty.length > 0) {
                     event.source.postMessage({ type: 'SYNC_PARTY', party: currentParty }, '*');
                 }
             }
 
-            // 3. TAB FOCUS SYNC: When an investigator is selected in one tab, sync the others
             if (event.data.type === 'TAB_SHIFT') {
                 const frames = document.querySelectorAll('.app-frame');
                 frames.forEach(frame => {
-                    // Send the index to everyone (except the sender)
                     if (frame.contentWindow !== event.source) {
                         frame.contentWindow.postMessage({ 
                             type: 'SET_ACTIVE_TAB', 
