@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>CDMD: Investigators</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Caudex:wght@400;700&family=MedievalSharp&display=swap" rel="stylesheet">
+    
+    <style>
+        :root { --accent: #4682B4; --gold: #c5a059; }
+        body, html {
+            margin: 0; padding: 0; height: 100%; width: 100%;
+            background-color: #000; color: #e0e0e0;
+            font-family: 'Caudex', serif; display: flex; flex-direction: column; overflow: hidden;
+        }
+
+        /* SETUP SCREEN & GALLERY */
+        #setupScreen {
+            position: fixed; inset: 0; z-index: 1000;
+            background: #0a0a0a; display: flex; flex-direction: column; align-items: center;
+            padding: 20px; overflow-y: auto;
+        }
+        .gallery {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: 15px; width: 100%; max-width: 900px; margin-top: 20px;
+        }
+        .thumb-container { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+        .thumb {
+            width: 100%; aspect-ratio: 1; border: 2px solid #333; border-radius: 8px;
+            background-size: cover; background-position: center; cursor: pointer; 
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        .thumb:active { transform: scale(0.95); }
+        .thumb.selected { border-color: var(--accent); box-shadow: 0 0 15px var(--accent); }
+        .thumb-name { font-family: 'MedievalSharp'; font-size: 0.8em; color: #888; text-align: center; }
+
+        /* PREVIEW POPUP */
+        #previewOverlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000;
+            display: none; justify-content: center; align-items: center; pointer-events: none;
+        }
+        #previewOverlay img { max-width: 90%; max-height: 90%; border: 3px solid var(--gold); border-radius: 10px; }
+
+        .start-btn {
+            margin: 40px 0; padding: 15px 50px; font-family: 'MedievalSharp';
+            background: #1a3c4a; color: white; border: 1px solid var(--accent);
+            border-radius: 4px; cursor: pointer; font-size: 1.4em;
+        }
+
+        /* ACTIVE GAME UI */
+        .investigator-bar {
+            display: flex; gap: 10px; width: 100%; padding: 10px;
+            background: #000; border-bottom: 2px solid #333; 
+            overflow-x: auto; box-sizing: border-box; flex-shrink: 0;
+        }
+        .char-tab {
+            padding: 12px 24px; background: #111; border: 1px solid #444; 
+            border-radius: 4px; color: #666; font-family: 'MedievalSharp'; 
+            cursor: pointer; white-space: nowrap; font-size: 1em;
+        }
+        .char-tab.active { background: #1a3c4a; border-color: var(--accent); color: white; }
+
+        /* MAXIMIZED BOARD */
+        #boardContainer {
+            position: relative; flex-grow: 1; width: 100vw;
+            background-repeat: no-repeat; background-position: center center;
+            background-size: contain; touch-action: none;
+        }
+
+        .token {
+            position: absolute; width: 42px; height: 42px;
+            border: 2px solid rgba(255,255,255,0.9); border-radius: 50%; 
+            z-index: 100; touch-action: none; box-sizing: border-box;
+        }
+
+        .btn-reset { 
+            position: fixed; bottom: 20px; right: 20px; background: rgba(20,20,20,0.9); 
+            border: 1px solid #444; color: #555; padding: 10px; border-radius: 5px; 
+            font-family: 'MedievalSharp'; cursor: pointer; z-index: 500; 
+        }
+    </style>
+</head>
+<body>
+
+    <div id="setupScreen">
+        <h1 style="font-family: 'MedievalSharp'; color: var(--accent); margin-bottom: 0;">Party Selection</h1>
+        <p style="color: #666; font-style: italic;">Tap to select • Hold to preview board</p>
+        <div class="gallery" id="gallery"></div>
+        <button class="start-btn" onclick="startGame()">Begin Ritual</button>
+    </div>
+
+    <div id="previewOverlay"><img id="previewImg" src=""></div>
+
+    <div class="investigator-bar" id="charBar"></div>
+    <div class="board-container" id="boardContainer" onmousedown="handleBoardClick(event)" ontouchstart="handleBoardClick(event)"></div>
+
+    <button class="btn-reset" onclick="location.reload()">Reset Session</button>
+
+    <script>
+        const totalImages = 29;
+        let selectedIndices = [];
+        let activeMemberIdx = 0;
+        let partyData = {}; 
+        let previewTimer;
+
+        const tokenColors = [
+            'radial-gradient(circle at 30% 30%, #ff4444, #8b0000)', // Red
+            'radial-gradient(circle at 30% 30%, #44ff44, #006400)', // Green
+            'radial-gradient(circle at 30% 30%, #4444ff, #00008b)', // Blue
+            'radial-gradient(circle at 30% 30%, #ffff44, #8b8b00)', // Yellow
+            'radial-gradient(circle at 30% 30%, #ff44ff, #8b008b)', // Purple
+            'radial-gradient(circle at 30% 30%, #ff8c00, #ff4500)'  // Orange
+        ];
+
+        // 1. Build Gallery with Long-Press Preview
+        const gallery = document.getElementById('gallery');
+        const overlay = document.getElementById('previewOverlay');
+        const pImg = document.getElementById('previewImg');
+
+        for (let i = 0; i < totalImages; i++) {
+            const container = document.createElement('div');
+            container.className = 'thumb-container';
+
+            const div = document.createElement('div');
+            div.className = 'thumb';
+            div.style.backgroundImage = `url('assets/investigators/investigator (${i}).jpg')`;
+            
+            // Hold to Preview Logic
+            const showPreview = () => {
+                pImg.src = `assets/investigators/investigator (${i}).jpg`;
+                overlay.style.display = 'flex';
+            };
+            const hidePreview = () => { overlay.style.display = 'none'; };
+
+            div.onmousedown = () => { previewTimer = setTimeout(showPreview, 500); };
+            div.onmouseup = () => { clearTimeout(previewTimer); hidePreview(); };
+            div.ontouchstart = () => { previewTimer = setTimeout(showPreview, 500); };
+            div.ontouchend = () => { clearTimeout(previewTimer); hidePreview(); };
+
+            div.onclick = () => {
+                if (selectedIndices.includes(i)) {
+                    selectedIndices = selectedIndices.filter(item => item !== i);
+                    div.classList.remove('selected');
+                } else {
+                    selectedIndices.push(i);
+                    div.classList.add('selected');
+                }
+            };
+
+            const label = document.createElement('div');
+            label.className = 'thumb-name';
+            label.innerText = `ID #${i}`;
+
+            container.appendChild(div);
+            container.appendChild(label);
+            gallery.appendChild(container);
+        }
+
+        // 2. Start Game
+        function startGame() {
+            if (selectedIndices.length === 0) return alert("Select your party first.");
+            document.getElementById('setupScreen').style.display = 'none';
+            selectedIndices.forEach((idx, i) => {
+                partyData[idx] = { tokens: [], color: tokenColors[i % tokenColors.length] }; 
+            });
+            renderTabs();
+            selectMember(0);
+        }
+
+        function renderTabs() {
+            const bar = document.getElementById('charBar');
+            bar.innerHTML = '';
+            selectedIndices.forEach((imgIdx, arrayIdx) => {
+                const btn = document.createElement('button');
+                btn.className = `char-tab ${arrayIdx === activeMemberIdx ? 'active' : ''}`;
+                btn.innerText = `Investigator ${arrayIdx + 1}`;
+                btn.onclick = (e) => { e.stopPropagation(); selectMember(arrayIdx); };
+                bar.appendChild(btn);
+            });
+        }
+
+        function selectMember(arrayIdx) {
+            saveCurrentTokens();
+            activeMemberIdx = arrayIdx;
+            const imgIdx = selectedIndices[arrayIdx];
+            const container = document.getElementById('boardContainer');
+            container.style.backgroundImage = `url('assets/investigators/investigator (${imgIdx}).jpg')`;
+            renderTabs();
+            loadTokens(imgIdx);
+        }
+
+        // 3. Token Logic
+        function handleBoardClick(e) {
+            if (e.target.classList.contains('token')) return;
+            const rect = document.getElementById('boardContainer').getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            createToken(clientX - rect.left - 21, clientY - rect.top - 21);
+        }
+
+        function createToken(x, y) {
+            const currentImgIdx = selectedIndices[activeMemberIdx];
+            const token = document.createElement('div');
+            token.className = 'token';
+            token.style.left = x + 'px';
+            token.style.top = y + 'px';
+            token.style.background = partyData[currentImgIdx].color;
+            
+            const glowMatch = partyData[currentImgIdx].color.match(/#[a-f\d]{6}|[a-z]+/gi);
+            token.style.boxShadow = `0 0 15px ${glowMatch[1]}, 0 4px 10px rgba(0,0,0,0.8)`;
+
+            token.onmousedown = (e) => startDrag(e, token);
+            token.ontouchstart = (e) => startDrag(e, token);
+            token.ondblclick = (e) => { e.stopPropagation(); token.remove(); };
+            
+            document.getElementById('boardContainer').appendChild(token);
+        }
+
+        function startDrag(e, el) {
+            e.preventDefault(); e.stopPropagation();
+            const container = document.getElementById('boardContainer');
+            const rect = container.getBoundingClientRect();
+            const move = (me) => {
+                const cx = me.touches ? me.touches[0].clientX : me.clientX;
+                const cy = me.touches ? me.touches[0].clientY : me.clientY;
+                el.style.left = (cx - rect.left - 21) + 'px';
+                el.style.top = (cy - rect.top - 21) + 'px';
+            };
+            const stop = () => {
+                window.removeEventListener('mousemove', move);
+                window.removeEventListener('touchmove', move);
+            };
+            window.addEventListener('mousemove', move);
+            window.addEventListener('touchmove', move);
+            window.addEventListener('mouseup', stop);
+            window.addEventListener('touchend', stop);
+        }
+
+        function saveCurrentTokens() {
+            if (selectedIndices.length === 0) return;
+            const currentImgIdx = selectedIndices[activeMemberIdx];
+            const tokens = document.querySelectorAll('.token');
+            partyData[currentImgIdx].tokens = Array.from(tokens).map(t => ({ left: t.style.left, top: t.style.top }));
+        }
+
+        function loadTokens(imgIdx) {
+            document.querySelectorAll('.token').forEach(t => t.remove());
+            (partyData[imgIdx].tokens || []).forEach(pos => {
+                createToken(parseFloat(pos.left), parseFloat(pos.top));
+            });
+        }
+    </script>
+</body>
+</html>

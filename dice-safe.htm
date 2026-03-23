@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>CDMD: Ritual Dice</title>
+    
+    <link rel="icon" type="image/png" href="assets/dice/icon-green-dice.png">
+    <link rel="apple-touch-icon" href="assets/dice/icon-green-dice.png">
+    <link href="https://fonts.googleapis.com/css2?family=Caudex:wght@400;700&family=MedievalSharp&display=swap" rel="stylesheet">
+    
+    <style>
+        :root { 
+            --accent: #ffcf67; 
+            --bright-green: #2ecc71; 
+            --succ-color: #ffcf67; 
+            --tent-color: #e74c3c; 
+            --elde-color: #27ae60; 
+            --border-gold: #8b7355;
+        }
+        
+        body {
+            background-color: #000;
+            background: linear-gradient(rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.85)), url('assets/bg.jpg');
+            background-size: cover;
+            color: #e0e0e0;
+            font-family: 'Caudex', serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px 20px 120px 20px;
+            box-sizing: border-box;
+        }
+
+        .header { font-family: 'MedievalSharp'; color: var(--accent); margin-bottom: 15px; text-transform: uppercase; letter-spacing: 2px; }
+
+        .controls {
+            display: flex; gap: 30px; margin-bottom: 25px;
+            background: rgba(255,255,255,0.05); padding: 12px 25px;
+            border-radius: 60px; border: 1px solid #333; backdrop-filter: blur(8px);
+        }
+
+        .die-counter { display: flex; align-items: center; gap: 12px; font-weight: bold; }
+        
+        .type-icon {
+            width: 32px; height: 32px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        .die-counter span[id*="Count"] { font-size: 1.4em; min-width: 25px; text-align: center; }
+        
+        .btn-circle-black { 
+            width: 44px; height: 44px; border-radius: 50%; 
+            border: 2px solid var(--accent); 
+			border-color: #333;
+			background: rgba(0,0,0,0.3); 
+            color: var(--accent); cursor: pointer; font-size: 1.5em;
+            display: flex; align-items: center; justify-content: center;
+			color: gray;
+        }
+		
+		.btn-circle-green { 
+            width: 44px; height: 44px; border-radius: 50%; 
+            border: 2px solid var(--accent); 
+			border-color: #333;
+			background: rgba(0,0,0,0.3); 
+            color: var(--accent); cursor: pointer; font-size: 1.5em;
+            display: flex; align-items: center; justify-content: center;
+			color: green;
+        }
+		
+		#greenCount{
+			color:green;
+		}
+		
+		#blackCount{
+			color:gray;
+		}
+		
+        .dice-tray, .report {
+            width: 100%;
+            max-width: 500px;
+            box-sizing: border-box;
+        }
+
+        .dice-tray {
+            background-image: 
+                linear-gradient(rgba(13, 26, 20, 0.4), rgba(8, 17, 13, 0.4)), 
+                url('assets/dice/wood.jpg'); 
+            background-size: cover;
+            background-position: center;
+            border: 10px solid #2a1a10; 
+            border-radius: 24px;
+            box-shadow: 
+                inset 0 0 1px 1px #8b7355, 
+                inset 5px 15px 40px rgba(0,0,0,0.9), 
+                0 15px 35px rgba(0,0,0,0.7); 
+            padding: 35px;
+            min-height: 220px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 25px;
+        }
+
+        .die-scene { width: 82px; height: 82px; perspective: 600px; cursor: pointer; position: relative; transition: transform 0.2s; }
+        .die-scene::after { content: ''; position: absolute; bottom: -8px; left: 10%; width: 80%; height: 15px; background: rgba(0,0,0,0.6); filter: blur(8px); border-radius: 50%; z-index: -1; }
+        .die-scene.held { transform: scale(1.08); }
+        .die-scene.held .cube-face { border: 2px solid #fff; box-shadow: 0 0 20px rgba(255, 255, 255, 0.3), inset 0 0 15px rgba(255, 207, 103, 0.6); filter: brightness(1.2); }
+
+        .cube { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 0.7s cubic-bezier(0.17, 0.67, 0.83, 0.67); }
+        .cube-face { position: absolute; width: 82px; height: 82px; border-radius: 18px; background-size: contain; background-repeat: no-repeat; background-position: center; background-origin: content-box; padding: 18px; box-sizing: border-box; backface-visibility: hidden; }
+
+        .black .cube-face { 
+            background-color: #222; 
+            background-image: radial-gradient(circle at 35% 35%, #2a2a2a 0%, #000 100%); 
+            box-shadow: 0 2px 4px rgba(255,255,255,0.12), inset 0 0 18px rgba(0,0,0,1);
+            border: 1px solid #777;
+        }
+        
+        .green .cube-face { 
+            background-color: #1a3c2a; 
+            background-image: radial-gradient(circle at 35% 35%, var(--bright-green) 0%, #0a1811 100%); 
+            box-shadow: inset 0 0 12px rgba(0,0,0,0.8);
+            border: 1.5px solid rgba(255,255,255,0.12);
+        }
+
+        .front  { transform: rotateY(0deg) translateZ(40px); }
+        .back   { transform: rotateY(180deg) translateZ(40px); }
+        .right  { transform: rotateY(90deg) translateZ(40px); }
+        .left   { transform: rotateY(-90deg) translateZ(40px); }
+        .top    { transform: rotateX(90deg) translateZ(40px); }
+        .bottom { transform: rotateX(-90deg) translateZ(40px); }
+
+        .rolling { animation: tumble 0.7s linear infinite; }
+        @keyframes tumble { 0% { transform: rotateX(0deg) rotateY(0deg); } 100% { transform: rotateX(360deg) rotateY(360deg); } }
+
+        .action-area { display: flex; flex-direction: column; align-items: center; gap: 20px; width: 100%; }
+        .btn-group { display: flex; gap: 10px; margin-bottom: 10px; }
+        
+		 #rollBtn {
+			min-width: 240px; 
+			height: 74px; /* Slightly taller to accommodate text comfortably */
+			background: linear-gradient(#2d4d3f, #122b21);
+			border: 2px solid var(--border-gold); 
+			border-radius: 4px;
+			cursor: pointer; 
+			display: flex; 
+			flex-direction: column; /* Stacks icons on top of text */
+			align-items: center; 
+			justify-content: center;
+			gap: 4px; /* Space between icons and text */
+			box-shadow: 0 4px 20px rgba(0,0,0,0.8);
+			padding: 8px;
+		}
+
+		.rollBtn-text {
+			font-family: 'MedievalSharp', serif;
+			font-size: 20px; /* Increased from 12px for better readability */
+			color: var(--accent); /* Using your gold accent color */
+			text-transform: normal;
+			letter-spacing: 1px;
+			margin: 0; /* Removed the 100px margin */
+			pointer-events: none; /* Prevents text from interfering with clicks */
+		}
+
+        #resetBtn {
+            width: 32px;
+            height: 32px;
+            background: #111;
+            color: var(--border-gold);
+            border: 2px solid var(--border-gold);
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'MedievalSharp';
+            font-size: 1.1em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+			margin: 7px 0 0 0;
+        }
+
+        #rollBtn:active, #resetBtn:active { filter: brightness(1.3); }
+
+        .roll-icon-container { display: flex; gap: 8px; align-items: center; justify-content: center; }
+        .roll-btn-icon { width: 38px; height: 38px; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); }
+
+        /* --- FIXED REPORT STYLES --- */
+        .report {
+            display: flex; 
+            gap: 10px;
+            font-family: 'MedievalSharp';
+            text-transform: uppercase; 
+            letter-spacing: 1px;
+            background-color: #1a0f08;
+            background-image: 
+              /*  url('https://www.transparenttextures.com/patterns/dark-wood.png'),*/
+                radial-gradient(circle at center, #26170d 0%, #0d0805 50%);
+            padding: 15px 5px; 
+            border-radius: 12px;
+            border: 2px solid #8b7355;
+            justify-content: space-between;
+        }
+
+        .report > div { 
+            flex: 1; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            gap: 4px; 
+        }
+
+        .report-label-row { 
+            display: flex; 
+            align-items: center; 
+            gap: 6px; 
+            font-size: 0.65em; 
+        }
+        
+        .report-icon { 
+            width: 22px; 
+            height: 22px; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .report-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        /* Color Filters to make the icons match the text */
+        .succ img { filter: sepia(1) saturate(5) hue-rotate(-15deg); } /* Gold */
+        .tent img { filter: drop-shadow(0 0 2px rgba(231, 76, 60, 0.5)); } /* Red (Assumes original is red or white) */
+        .elde img { filter: sepia(1) saturate(5) hue-rotate(90deg); } /* Green */
+
+        .report span[id*="res"] { font-weight: bold; font-size: 2.4em; line-height: 1; font-family: 'MedievalSharp'; margin-top: 2px; }
+
+        .report-label-row.succ, span#resSuccess { color: var(--succ-color); }
+        .report-label-row.tent, span#resTentacle { color: var(--tent-color); }
+        .report-label-row.elde, span#resElder { color: var(--elde-color); }
+
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background: rgba(10, 10, 10, .25);
+            border-top: 1px solid #333;
+            display: flex; justify-content: center;
+            padding: 15px 0; backdrop-filter: blur(10px);
+            z-index: 100;
+        }
+
+        .nav-item {
+            color: #666; font-family: 'MedievalSharp'; font-size: 0.9em;
+            text-transform: uppercase; cursor: pointer; letter-spacing: 1px;
+            display: flex; flex-direction: column; align-items: center; gap: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="controls">
+        <div class="die-counter">
+            <div class="type-icon" style="background-image: url('assets/dice/icon-black-dice.png');"></div>
+            <button class="btn-circle-black" onclick="updateCount('black', -1)">−</button>
+            <span id="blackCount">3</span>
+            <button class="btn-circle-black" onclick="updateCount('black', 1)">+</button>
+        </div>
+		<button id="resetBtn" title="Reset to 3 Black" onclick="resetDice()">↺</button>
+        <div class="die-counter">
+            <div class="type-icon" style="background-image: url('assets/dice/icon-green-dice.png');"></div>
+            <button class="btn-circle-green" onclick="updateCount('green', -1)">−</button>
+            <span id="greenCount">0</span>
+            <button class="btn-circle-green" onclick="updateCount('green', 1)">+</button>
+        </div>
+    </div>
+
+    <div class="dice-tray" id="diceContainer"></div>
+
+    <div class="action-area">
+        <div class="btn-group">
+			<button id="rollBtn" onclick="rollAll()">
+				<div style="display: flex; gap: 8px;">
+					<img src="assets/dice/icon-black-dice.png" style="width:30px;">
+					<img src="assets/dice/icon-green-dice.png" id="greenRollIcon" style="width:30px; display: none;">
+				</div>
+				<span class="rollBtn-text">Roll Dice</span>
+			</button>
+        </div>
+
+        <div class="report">
+            <div class="succ">
+                <div class="report-label-row">
+                    <div class="report-icon"><img src="assets/dice/success-white.svg"></div>
+                    <span>SUCCESS</span>
+                </div>
+                <span id="resSuccess">0</span>
+            </div>
+            <div class="tent">
+                <div class="report-label-row">
+                    <div class="report-icon"><img src="assets/dice/tentacle-white.svg"></div>
+                    <span>INSANITY</span>
+                </div>
+                <span id="resTentacle">0</span>
+            </div>
+            <div class="elde">
+                <div class="report-label-row">
+                    <div class="report-icon"><img src="assets/dice/elder-white.svg"></div>
+                    <span>ELDER</span>
+                </div>
+                <span id="resElder">0</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-nav">
+        <div class="nav-item" onclick="location.reload()">
+            <span style="font-size: 1.4em;">⟳</span>
+            <span>Reload App</span>
+        </div>
+    </div>
+
+    <script>
+        let counts = { black: 3, green: 0 };
+        let results = []; 
+        const rollSound = new Audio('assets/dice.mp3');
+
+        const faceFiles = { success: 'success-white.svg', tentacle: 'tentacle-white.svg', both: 'success-tentacle-white.svg', elder: 'elder-white.svg', blank: '' };
+        const blackPool = ['both', 'elder', 'success', 'success', 'tentacle', 'blank'];
+        const greenPool = ['both', 'elder', 'success', 'blank', 'success', 'blank'];
+
+        function updateCount(type, delta) {
+            counts[type] = Math.max(0, Math.min(10, counts[type] + delta));
+            document.getElementById(type + 'Count').innerText = counts[type];
+            const greenIcon = document.getElementById('greenRollIcon');
+            if (greenIcon) greenIcon.style.display = counts.green > 0 ? 'block' : 'none';
+            renderDice();
+        }
+
+        function resetDice() {
+            counts = { black: 3, green: 0 };
+            document.getElementById('blackCount').innerText = 3;
+            document.getElementById('greenCount').innerText = 0;
+            const greenIcon = document.getElementById('greenRollIcon');
+            if (greenIcon) greenIcon.style.display = 'none';
+            renderDice();
+        }
+
+        function toggleHold(el) { el.classList.toggle('held'); }
+
+        function renderDice() {
+            const container = document.getElementById('diceContainer');
+            container.innerHTML = '';
+            results = []; 
+            ['black', 'green'].forEach(color => {
+                const pool = color === 'black' ? blackPool : greenPool;
+                for(let i=0; i<counts[color]; i++) {
+                    const id = results.length;
+                    results.push('blank'); 
+                    container.innerHTML += `<div class="die-scene ${color}" onclick="toggleHold(this)" data-id="${id}"><div class="cube"><div class="cube-face front" style="background-image: url('assets/dice/${faceFiles[pool[0]]}')"></div><div class="cube-face back" style="background-image: url('assets/dice/${faceFiles[pool[1]]}')"></div><div class="cube-face right" style="background-image: url('assets/dice/${faceFiles[pool[2]]}')"></div><div class="cube-face left" style="background-image: url('assets/dice/${faceFiles[pool[3]]}')"></div><div class="cube-face top" style="background-image: url('assets/dice/${faceFiles[pool[4]]}')"></div><div class="cube-face bottom" style="background-image: url('assets/dice/${faceFiles[pool[5]]}')"></div></div></div>`;
+                }
+            });
+            updateReport();
+        }
+
+        function rollAll() {
+            const scenes = document.querySelectorAll('.die-scene');
+            let rollingAny = false;
+            scenes.forEach(scene => {
+                if (scene.classList.contains('held')) return;
+                rollingAny = true;
+                const cube = scene.querySelector('.cube');
+                cube.classList.add('rolling');
+                const isBlack = scene.classList.contains('black');
+                const pool = isBlack ? blackPool : greenPool;
+                const resultIdx = Math.floor(Math.random() * 6);
+                results[scene.dataset.id] = pool[resultIdx];
+                const rotations = ['rotateY(0deg)', 'rotateY(180deg)', 'rotateY(-90deg)', 'rotateY(90deg)', 'rotateX(-90deg)', 'rotateX(90deg)'];
+                setTimeout(() => {
+                    cube.classList.remove('rolling');
+                    cube.style.transform = rotations[resultIdx];
+                    updateReport();
+                }, 700);
+            });
+            if (rollingAny) {
+                rollSound.currentTime = 0;
+                rollSound.play().catch(() => {});
+            }
+        }
+
+        function updateReport() {
+            let s = 0, t = 0, e = 0;
+            results.forEach(res => {
+                if (res === 'success') s++;
+                if (res === 'tentacle') t++;
+                if (res === 'elder') e++;
+                if (res === 'both') { s++; t++; }
+            });
+            document.getElementById('resSuccess').innerText = s;
+            document.getElementById('resTentacle').innerText = t;
+            document.getElementById('resElder').innerText = e;
+        }
+
+        renderDice();
+    </script>
+</body>
+</html>

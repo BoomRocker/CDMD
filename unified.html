@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>CDMD Companion</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap" rel="stylesheet">
+
+    <style>
+        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #000; }
+        
+        /* The Navigation Bar */
+        .nav-bar {
+            display: flex;
+            background: #0a0a0a;
+            border-bottom: 2px solid #333;
+            height: 60px;
+            position: relative;
+            z-index: 100;
+        }
+
+        .nav-btn {
+            flex: 1;
+            border: none;
+            background: none;
+            font-family: 'MedievalSharp', cursive;
+            font-size: 1.1em;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            border-bottom: 4px solid transparent;
+        }
+
+        /* Tactical Grid - Gold Theme */
+        .btn-grid { color: #5c4b2b; }
+        .btn-grid.active { 
+            color: #ffcf67; 
+            border-bottom-color: #ffcf67; 
+            background: linear-gradient(to top, rgba(255, 207, 103, 0.1), transparent);
+        }
+
+        /* Ritual Dice - Green Theme */
+        .btn-dice { color: #1a3c2a; }
+        .btn-dice.active { 
+            color: #2ecc71; 
+            border-bottom-color: #2ecc71; 
+            background: linear-gradient(to top, rgba(46, 204, 113, 0.1), transparent);
+        }
+
+        /* Investigators - Steel Blue Theme */
+        .btn-invest { color: #3e5a6d; }
+        .btn-invest.active { 
+            color: #4682B4; 
+            border-bottom-color: #4682B4; 
+            background: linear-gradient(to top, rgba(70, 130, 180, 0.1), transparent);
+        }
+
+        /* Container to hold apps in the same spot */
+        .app-wrapper {
+            position: relative;
+            width: 100%;
+            height: calc(100% - 60px);
+        }
+
+        .app-frame {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            /* Use visibility/opacity to keep the state alive without reloading */
+            visibility: hidden;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+
+        .app-frame.active {
+            visibility: visible;
+            opacity: 1;
+            pointer-events: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="nav-bar">
+        <button id="btnGrid" class="nav-btn btn-grid active" onclick="switchApp('grid')">Tactical Grid</button>
+        <button id="btnDice" class="nav-btn btn-dice" onclick="switchApp('dice')">Ritual Dice</button>
+        <button id="btnInvest" class="nav-btn btn-invest" onclick="switchApp('invest')">Investigators</button>
+    </nav>
+
+    <div class="app-wrapper">
+        <iframe src="boss-scenario.htm" id="gridFrame" class="app-frame active"></iframe>
+        <iframe src="dice.htm" id="diceFrame" class="app-frame"></iframe>
+        <iframe src="investigators.htm" id="investFrame" class="app-frame"></iframe>
+    </div>
+
+    <script>
+        function switchApp(app) {
+            // Get all buttons and frames
+            const buttons = document.querySelectorAll('.nav-btn');
+            const frames = document.querySelectorAll('.app-frame');
+
+            // Remove active status from everyone
+            buttons.forEach(btn => btn.classList.remove('active'));
+            frames.forEach(frame => frame.classList.remove('active'));
+
+            // Set active status based on selection
+            if (app === 'grid') {
+                document.getElementById('btnGrid').classList.add('active');
+                document.getElementById('gridFrame').classList.add('active');
+            } else if (app === 'dice') {
+                document.getElementById('btnDice').classList.add('active');
+                document.getElementById('diceFrame').classList.add('active');
+            } else if (app === 'invest') {
+                document.getElementById('btnInvest').classList.add('active');
+                document.getElementById('investFrame').classList.add('active');
+            }
+        }
+    </script>
+</body>
+</html>
