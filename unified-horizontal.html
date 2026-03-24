@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>CDMD Companion</title>
+
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="CDMD Dice">
+    <meta name="mobile-web-app-capable" content="yes">
+
+    <link rel="icon" type="image/png" href="assets/dice/elder-white.svg">
+    <link rel="apple-touch-icon" href="assets/dice/elder-white.svg">
+    
+    <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap" rel="stylesheet">
+    
+    <style>
+        body, html { 
+            margin: 0; 
+            padding: 0; 
+            height: 100%; 
+            overflow: hidden; 
+            background: #000; 
+            font-family: sans-serif; 
+            /* Prevents accidental pull-to-refresh on iPad */
+            overscroll-behavior-y: contain; 
+        }
+        
+        /* Navigation Bar */
+        .nav-bar {
+            display: flex; 
+            background: #0a0a0a; 
+            border-bottom: 2px solid #333;
+            height: 60px; 
+            position: relative; 
+            z-index: 100;
+            /* Extra padding for iPad notch/status bar area */
+            padding-top: env(safe-area-inset-top);
+        }
+        .nav-btn {
+            flex: 1; border: none; background: none; font-family: 'MedievalSharp', cursive;
+            font-size: 1.1em; cursor: pointer; text-transform: uppercase;
+            transition: all 0.3s ease;
+			border-bottom: 4px solid transparent;
+        }
+
+        .btn-grid { color: #5c4b2b; }
+			.btn-grid.active { 
+			color: #ffcf67; 
+			border-bottom-color: #ffcf67; 
+			background: linear-gradient(to top, rgba(255, 207, 103, 0.1), transparent); 
+		}
+
+        .btn-invest { color: #3e5a6d; }
+        .btn-invest.active { color: #4682B4; border-bottom-color: #4682B4; background: linear-gradient(to top, rgba(70, 130, 180, 0.1), transparent); }
+
+        .btn-dice { color: #1a3c2a; }
+        .btn-dice.active { color: #2ecc71; border-bottom-color: #2ecc71; background: linear-gradient(to top, rgba(46, 204, 113, 0.1), transparent); }
+
+        .app-wrapper { position: relative; width: 100%; height: calc(100% - 60px); }
+        .app-frame {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            border: none; visibility: hidden; opacity: 0; pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+        .app-frame.active { visibility: visible; opacity: 1; pointer-events: auto; }
+    </style>
+</head>
+<body>
+
+    <nav class="nav-bar">
+        <button id="btnGrid" class="nav-btn btn-grid active" onclick="switchApp('grid')">Tactical Grid</button>
+        <button id="btnInvest" class="nav-btn btn-invest" onclick="switchApp('invest')">Investigators</button>
+        <button id="btnDice" class="nav-btn btn-dice" onclick="switchApp('dice')">Dice Roller</button>
+    </nav>
+
+    <div class="app-wrapper">
+        <iframe src="boss-scenario.htm" id="gridFrame" class="app-frame active"></iframe>
+        <iframe src="investigators.htm" id="investFrame" class="app-frame"></iframe>
+        <iframe src="dice.htm" id="diceFrame" class="app-frame"></iframe>
+    </div>
+
+    <script>
+        let currentParty = [];
+
+        function switchApp(app) {
+            const buttons = document.querySelectorAll('.nav-btn');
+            const frames = document.querySelectorAll('.app-frame');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            frames.forEach(frame => frame.classList.remove('active'));
+
+            const targetBtn = document.getElementById('btn' + app.charAt(0).toUpperCase() + app.slice(1));
+            const targetFrame = document.getElementById(app + 'Frame');
+            
+            targetBtn.classList.add('active');
+            targetFrame.classList.add('active');
+
+            if (app === 'dice' && currentParty.length > 0) {
+                targetFrame.contentWindow.postMessage({ type: 'SYNC_PARTY', party: currentParty }, '*');
+            }
+        }
+
+        window.addEventListener('message', function(event) {
+            if (event.data.type === 'PARTY_CONFIRMED') {
+                currentParty = event.data.party;
+                const diceFrame = document.getElementById('diceFrame').contentWindow;
+                diceFrame.postMessage({ type: 'SYNC_PARTY', party: currentParty }, '*');
+            }
+
+            if (event.data.type === 'REQUEST_SYNC') {
+                if (currentParty.length > 0) {
+                    event.source.postMessage({ type: 'SYNC_PARTY', party: currentParty }, '*');
+                }
+            }
+
+            if (event.data.type === 'TAB_SHIFT') {
+                const frames = document.querySelectorAll('.app-frame');
+                frames.forEach(frame => {
+                    if (frame.contentWindow !== event.source) {
+                        frame.contentWindow.postMessage({ 
+                            type: 'SET_ACTIVE_TAB', 
+                            index: event.data.index 
+                        }, '*');
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

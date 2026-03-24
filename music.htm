@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>CDMD: Investigation Music</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Caudex:wght@400;700&family=MedievalSharp&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
+    <style>
+        :root { 
+            --eldritch-purple: #a29bfe;
+            --border-gold: #8b7355;
+        }
+        
+        body {
+            background: linear-gradient(rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.9)), url('assets/bg.jpg');
+            background-size: cover;
+            color: #e0e0e0; font-family: 'Caudex', serif;
+            margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center;
+            min-height: 100vh; box-sizing: border-box;
+        }
+
+        .player-container {
+            width: 95%; max-width: 500px;
+            border: 12px solid #2a1a10; border-image: url('assets/dice/wood.jpg') 45 round; border-radius: 20px;
+            background: #1a1a2e; background-image: radial-gradient(circle at center, rgba(0,0,0,0) 0%, rgba(0,0,0,0.8) 100%);
+            box-shadow: 0 15px 45px rgba(0,0,0,0.9), inset 0 10px 30px rgba(0,0,0,0.8);
+            padding: 30px; text-align: center;
+        }
+
+        /* --- ROTATING DISC --- */
+        .album-art {
+            width: 140px; height: 140px; margin: 0 auto 20px;
+            border: 4px solid var(--border-gold); border-radius: 50%;
+            background: url('assets/symbol.png') center/cover;
+            box-shadow: 0 0 20px rgba(162, 155, 254, 0.2);
+        }
+        .playing .album-art { animation: rotate 25s linear infinite; }
+        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        /* --- SCRUBBER BAR --- */
+        .scrubber-container { margin: 20px 0 10px; width: 100%; }
+        .progress-bar {
+            width: 100%; height: 6px; border-radius: 3px; cursor: pointer;
+            accent-color: var(--eldritch-purple); background: #333;
+        }
+        .time-info {
+            display: flex; justify-content: space-between;
+            font-size:1em; color: #666; font-family: 'MedievalSharp'; margin-top: 5px;
+        }
+
+        h2 { font-family: 'MedievalSharp'; color: var(--eldritch-purple); margin: 5px 0; letter-spacing: 1px; }
+
+        .controls { display: flex; justify-content: center; align-items: center; gap: 20px; margin-bottom: 20px; }
+        .play-btn {
+            width: 64px; height: 64px; border-radius: 50%; border: 2px solid var(--border-gold);
+            background: rgba(0,0,0,0.4); color: var(--eldritch-purple); cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        /* --- VOLUME --- */
+        .vol-box { display: flex; align-items: center; gap: 10px; margin-top: 20px; opacity: 0.6; }
+        .vol-slider { flex: 1; accent-color: var(--border-gold); height: 4px; }
+
+        .track-list { margin-top: 25px; text-align: left; background: rgba(0,0,0,0.3); border-radius: 10px; padding: 5px; }
+        .track-item {
+            padding: 10px 15px; border-bottom: 1px solid #222; cursor: pointer;
+            font-family: 'MedievalSharp'; font-size: 1em; display: flex; align-items: center; gap: 10px; color: #777;
+        }
+        .track-item.active { color: var(--eldritch-purple); background: rgba(162,155,254,0.1); }
+    </style>
+</head>
+<body>
+
+    <div class="player-container" id="playerUI">
+        <audio id="mainAudio" loop>
+            <source src="assets/music/music01.mp4" type="audio/mp4">
+        </audio>
+        
+        <div class="album-art"></div>
+        <h2 id="currentTitle">Investigation Track 01</h2>
+
+        <div class="scrubber-container">
+            <input type="range" id="progressBar" class="progress-bar" min="0" max="100" value="0">
+            <div class="time-info">
+                <span id="currentTime">0:00</span>
+                <span id="totalTime">0:00</span>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="play-btn" onclick="togglePlay()">
+                <span class="material-icons" id="playIcon">play_arrow</span>
+            </button>
+        </div>
+
+        <div class="vol-box">
+            <span class="material-icons" style="font-size:18px;">volume_down</span>
+            <input type="range" class="vol-slider" min="0" max="1" step="0.05" value="0.5" oninput="setVolume(this.value)">
+        </div>
+
+        <div class="track-list">
+            <div class="track-item active" onclick="loadTrack('assets/music/music01.mp4', 'Investigation Track 01', this)">
+                <span class="material-icons">menu_book</span> Resonance I
+            </div>
+            <div class="track-item" onclick="loadTrack('assets/music/music02.mp4', 'Investigation Track 02', this)">
+                <span class="material-icons">menu_book</span> Resonance II
+            </div>
+            <div class="track-item" onclick="loadTrack('assets/music/music03.mp4', 'Investigation Track 03', this)">
+                <span class="material-icons">menu_book</span> Resonance III
+            </div>
+			<div class="track-item" onclick="loadTrack('assets/music/music04.mp4', 'Investigation Track 04', this)">
+                <span class="material-icons">menu_book</span> Resonance IV
+            </div>
+			<div class="track-item" onclick="loadTrack('assets/music/music05.mp4', 'Investigation Track 05', this)">
+                <span class="material-icons">menu_book</span> Resonance V
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const audio = document.getElementById('mainAudio');
+        const playIcon = document.getElementById('playIcon');
+        const uiContainer = document.getElementById('playerUI');
+        const progressBar = document.getElementById('progressBar');
+        const curTimeText = document.getElementById('currentTime');
+        const totTimeText = document.getElementById('totalTime');
+
+        function togglePlay() {
+            if (audio.paused) {
+                audio.play();
+                playIcon.innerText = 'pause';
+                uiContainer.classList.add('playing');
+            } else {
+                audio.pause();
+                playIcon.innerText = 'play_arrow';
+                uiContainer.classList.remove('playing');
+            }
+        }
+
+        function loadTrack(file, title, el) {
+            audio.src = file;
+            document.getElementById('currentTitle').innerText = title;
+            document.querySelectorAll('.track-item').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+            audio.play();
+            playIcon.innerText = 'pause';
+            uiContainer.classList.add('playing');
+        }
+
+        function setVolume(val) { audio.volume = val; }
+
+        // --- SCRUBBING LOGIC ---
+
+        // Update progress bar as audio plays
+        audio.addEventListener('timeupdate', () => {
+            if (!isNaN(audio.duration)) {
+                const percent = (audio.currentTime / audio.duration) * 100;
+                progressBar.value = percent;
+                curTimeText.innerText = formatTime(audio.currentTime);
+                totTimeText.innerText = formatTime(audio.duration);
+            }
+        });
+
+        // Scrub to position when slider is moved
+        progressBar.addEventListener('input', () => {
+            const seekTime = (progressBar.value / 100) * audio.duration;
+            audio.currentTime = seekTime;
+        });
+
+        function formatTime(seconds) {
+            const min = Math.floor(seconds / 60);
+            const sec = Math.floor(seconds % 60);
+            return `${min}:${sec < 10 ? '0' : ''}${sec}`;
+        }
+    </script>
+</body>
+</html>

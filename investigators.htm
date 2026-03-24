@@ -15,25 +15,87 @@
             font-family: 'Caudex', serif; display: flex; flex-direction: column; overflow: hidden;
         }
 
+        /* --- SETUP SCREEN --- */
         #setupScreen {
             position: fixed; inset: 0; z-index: 1000;
-            background: #0a0a0a; display: flex; flex-direction: column; align-items: center;
+            background: #0a0a0a; display: flex; flex-direction: column;
             padding: 20px; overflow-y: auto;
         }
+
+        .setup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto 5px auto;
+        }
+
+        .setup-title {
+            font-family: 'MedievalSharp'; 
+            color: var(--accent); 
+            margin: 0;
+            font-size: 1.8em;
+            flex-grow: 1;
+        }
+
+        .start-btn {
+            padding: 12px 30px; 
+            font-family: 'MedievalSharp';
+            background: #1a3c4a; 
+            color: white; 
+            border: 1px solid var(--accent);
+            border-radius: 4px; 
+            cursor: pointer; 
+            font-size: 1.1em;
+            transition: all 0.2s;
+            min-width: 220px;
+        }
+        .start-btn:active { background: var(--accent); transform: scale(0.98); }
+
         .gallery {
             display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-            gap: 10px; width: 100%; max-width: auto; margin-top: 10px;
+            gap: 12px; width: 100%; max-width: 1200px; margin: 10px auto;
         }
-        .thumb-container { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+
+        /* --- THUMBNAIL & SELECTION STYLES --- */
+        .thumb-container { position: relative; display: flex; flex-direction: column; align-items: center; }
+        
         .thumb {
             width: 100%; aspect-ratio: 1; 
-            border: 3px solid #333; 
+            border: 2px solid #333; 
             border-radius: 8px;
             background-size: cover; background-position: center; cursor: pointer; 
-            transition: all 0.2s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             box-sizing: border-box;
+            opacity: 0.6; /* Faded by default */
         }
-        .thumb:active { transform: scale(0.95); }
+
+        /* The "Obvious" Selection State */
+        .thumb.selected {
+            border-width: 5px;
+            opacity: 1;
+            transform: scale(1.05);
+            z-index: 10;
+            /* Inset creates the white inner ring for contrast */
+            box-shadow: inset 0 0 0 2px rgba(255,255,255,0.9), 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        .player-badge {
+            position: absolute;
+            top: -5px; right: -5px;
+            width: 28px; height: 28px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'MedievalSharp';
+            font-size: 0.8em;
+            font-weight: bold;
+            color: white;
+            border: 2px solid white;
+            z-index: 20;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+            pointer-events: none;
+        }
 
         #previewOverlay {
             position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000;
@@ -41,33 +103,15 @@
         }
         #previewOverlay img { max-width: 90%; max-height: 90%; border: 3px solid var(--gold); border-radius: 10px; }
 
-        .start-btn {
-            margin: 0px 0; padding: 10px 50px; font-family: 'MedievalSharp';
-            background: #1a3c4a; color: white; border: 1px solid var(--accent);
-            border-radius: 4px; cursor: pointer; font-size: 1.4em;
-        }
-
-        /* --- HEADER BAR --- */
+        /* --- IN-GAME UI --- */
         .investigator-bar {
-            display: flex; 
-            align-items: center;
-            justify-content: space-between;
-            width: 100%; 
-            padding: 8px 12px;
-            background: #000; 
-            border-bottom: 2px solid #333; 
-            box-sizing: border-box; 
-            flex-shrink: 0;
-            height: 60px;
+            display: flex; align-items: center; justify-content: space-between;
+            width: 100%; padding: 8px 12px; background: #000; 
+            border-bottom: 2px solid #333; box-sizing: border-box; 
+            flex-shrink: 0; height: 60px;
         }
 
-        .tab-wrapper {
-            display: flex;
-            gap: 10px;
-            overflow-x: auto;
-            scrollbar-width: none;
-            flex-grow: 1;
-        }
+        .tab-wrapper { display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; flex-grow: 1; }
         .tab-wrapper::-webkit-scrollbar { display: none; }
 
         .char-tab {
@@ -77,44 +121,23 @@
             transition: all 0.3s ease;
         }
 
-        /* --- HEADER BUTTONS --- */
         .header-actions { display: flex; align-items: center; gap: 8px; }
 
         .btn-reset { 
-            background: rgba(40, 20, 20, 0.9); 
-            border: 1px solid #633; 
-            color: #a66; 
-            padding: 6px 12px; 
-            border-radius: 4px; 
-            font-family: 'MedievalSharp'; 
-            cursor: pointer;
-            white-space: nowrap;
-            font-size: 0.8em;
+            background: rgba(40, 20, 20, 0.9); border: 1px solid #633; color: #a66; 
+            padding: 6px 12px; border-radius: 4px; font-family: 'MedievalSharp'; 
+            cursor: pointer; white-space: nowrap; font-size: 0.8em;
         }
 
-        /* --- TRASH DROP ZONE (HEADER) --- */
         #trashZone {
-            width: 80px;
-            height: 34px;
-            background: rgba(139, 26, 26, 0.2);
-            border: 1px dashed rgba(255, 255, 255, 0.3);
-            border-radius: 4px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: rgba(255, 255, 255, 0.4);
-            font-family: 'MedievalSharp';
-            font-size: 0.7em;
-            text-align: center;
-            pointer-events: none;
+            width: 80px; height: 34px; background: rgba(139, 26, 26, 0.2);
+            border: 1px dashed rgba(255, 255, 255, 0.3); border-radius: 4px;
+            display: flex; justify-content: center; align-items: center;
+            color: rgba(255, 255, 255, 0.4); font-family: 'MedievalSharp';
+            font-size: 0.7em; text-align: center; pointer-events: none;
             transition: all 0.3s ease;
         }
-        #trashZone.active { 
-            background: #8b1a1a; 
-            border-color: #fff; 
-            color: #fff; 
-            transform: scale(1.1);
-        }
+        #trashZone.active { background: #8b1a1a; border-color: #fff; color: #fff; transform: scale(1.1); }
 
         #boardContainer {
             position: relative; flex-grow: 1; width: 100vw;
@@ -123,16 +146,9 @@
         }
 
         .token {
-            position: absolute;
-            width: 88px; 
-            height: 88px;
-            cursor: move;
-            z-index: 100;
-            touch-action: none;
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
-            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.8));
+            position: absolute; width: 88px; height: 88px; cursor: move; z-index: 100;
+            touch-action: none; background-size: contain; background-repeat: no-repeat;
+            background-position: center; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.8));
             transform: translate(-50%, -50%);
         }
     </style>
@@ -140,10 +156,15 @@
 <body>
 
     <div id="setupScreen">
-        <h1 style="font-family: 'MedievalSharp'; color: var(--accent); margin: 0 0 10px 0;">Select the Investigators</h1>
+        <div class="setup-header">
+            <h1 class="setup-title">Select Investigators</h1>
+            <button class="start-btn" onclick="startGame()">Begin Investigation</button>
+        </div>
+        <p style="color: #666; font-style: italic; margin: 0 0 15px 0; width: 100%; max-width: 1200px; align-self: center;">
+            Tap to select • Hold to preview board
+        </p>
+        
         <div class="gallery" id="gallery"></div>
-        <button class="start-btn" onclick="startGame()" style="margin-top: 20px;">Begin Investigation</button>
-        <p style="color: #666; font-style: italic; margin-top: 10px;">Tap to select • Hold to preview board</p>
     </div>
 
     <div id="previewOverlay"><img id="previewImg" src=""></div>
@@ -165,16 +186,11 @@
         let partyData = {}; 
         let previewTimer;
         
-        // Added Audio Object
         const trashSound = new Audio('assets/trash.mp3');
 
         const STARTING_POSITIONS = [
-            { x: 4.5,  y: 8.5 },
-            { x: 7.5,  y: 77.5 },
-            { x: 7.5,  y: 89.5 },
-            { x: 57.5, y: 33.5 },
-            { x: 57.5, y: 62.5 },
-            { x: 57.5, y: 88.5 }
+            { x: 4.5,  y: 8.5 }, { x: 7.5,  y: 77.5 }, { x: 7.5,  y: 89.5 },
+            { x: 57.5, y: 33.5 }, { x: 57.5, y: 62.5 }, { x: 57.5, y: 88.5 }
         ];
 
         const investigatorThemes = [
@@ -186,9 +202,12 @@
         const overlay = document.getElementById('previewOverlay');
         const pImg = document.getElementById('previewImg');
 
+        // Build Gallery
         for (let i = 0; i < totalImages; i++) {
             const container = document.createElement('div');
             container.className = 'thumb-container';
+            container.id = `cont-${i}`;
+
             const div = document.createElement('div');
             div.className = 'thumb';
             div.id = `thumb-${i}`;
@@ -201,13 +220,13 @@
             div.onmouseup = () => { clearTimeout(previewTimer); hidePreview(); };
             div.ontouchstart = () => { previewTimer = setTimeout(showPreview, 500); };
             div.ontouchend = () => { clearTimeout(previewTimer); hidePreview(); };
-            div.onclick = () => { toggleSelection(i, div); };
+            div.onclick = () => { toggleSelection(i); };
 
             container.appendChild(div);
             gallery.appendChild(container);
         }
 
-        function toggleSelection(idx, element) {
+        function toggleSelection(idx) {
             const existingIdx = selectedIndices.indexOf(idx);
             if (existingIdx > -1) {
                 selectedIndices.splice(existingIdx, 1);
@@ -218,40 +237,44 @@
         }
 
         function refreshGalleryHighlights() {
+            // Reset all
             document.querySelectorAll('.thumb').forEach(t => {
+                t.classList.remove('selected');
                 t.style.borderColor = "#333";
                 t.style.boxShadow = "none";
             });
+            document.querySelectorAll('.player-badge').forEach(b => b.remove());
+
+            // Apply to selected
             selectedIndices.forEach((imgIdx, orderIdx) => {
                 const thumb = document.getElementById(`thumb-${imgIdx}`);
+                const container = document.getElementById(`cont-${imgIdx}`);
                 const theme = investigatorThemes[orderIdx % investigatorThemes.length];
+                
+                thumb.classList.add('selected');
                 thumb.style.borderColor = theme.hex;
-                thumb.style.boxShadow = `0 0 15px ${theme.hex}`;
+                // Add outer glow with the theme color
+                thumb.style.boxShadow = `inset 0 0 0 2px rgba(255,255,255,0.9), 0 0 20px ${theme.hex}aa`;
+
+                // Add Badge
+                const badge = document.createElement('div');
+                badge.className = 'player-badge';
+                badge.innerText = `P${orderIdx + 1}`;
+                badge.style.backgroundColor = theme.hex;
+                container.appendChild(badge);
             });
         }
 
         function startGame() {
             if (selectedIndices.length === 0) return alert("Select your party first.");
-            
-            // Prime the audio for mobile
             trashSound.play().then(() => { trashSound.pause(); trashSound.currentTime = 0; }).catch(e => {});
-            
             document.getElementById('setupScreen').style.display = 'none';
             
             selectedIndices.forEach((idx, i) => {
                 const theme = investigatorThemes[i % investigatorThemes.length];
-                partyData[idx] = { 
-                    tokens: [], 
-                    color: theme.hex,
-                    playerNum: i + 1 
-                }; 
-                
+                partyData[idx] = { tokens: [], color: theme.hex, playerNum: i + 1 }; 
                 STARTING_POSITIONS.forEach(pos => {
-                    partyData[idx].tokens.push({
-                        leftPct: pos.x,
-                        topPct: pos.y,
-                        pNum: i + 1
-                    });
+                    partyData[idx].tokens.push({ leftPct: pos.x, topPct: pos.y, pNum: i + 1 });
                 });
             });
 
@@ -264,9 +287,7 @@
         }
 
         function confirmReset() {
-            if (confirm("Are you sure you want to reset the session? This will clear all party data and tokens.")) {
-                location.reload();
-            }
+            if (confirm("Reset session? This clears all party data.")) { location.reload(); }
         }
 
         function selectMember(arrayIdx) {
@@ -311,7 +332,6 @@
             const rect = container.getBoundingClientRect();
             const clientX = e.touches ? e.touches[0].clientX : e.clientX;
             const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-            
             const xPct = ((clientX - rect.left) / rect.width) * 100;
             const yPct = ((clientY - rect.top) / rect.height) * 100;
             createToken(xPct, yPct, null, true);
@@ -325,10 +345,8 @@
             token.className = 'token';
             token.setAttribute('data-player', pNum);
             token.style.backgroundImage = `url('assets/investigators/p${pNum}.png')`;
-            
             token.style.left = isPct ? x + '%' : x + 'px';
             token.style.top = isPct ? y + '%' : y + 'px';
-
             token.onmousedown = (e) => startDrag(e, token);
             token.ontouchstart = (e) => startDrag(e, token);
             token.oncontextmenu = (e) => { e.preventDefault(); token.remove(); saveCurrentTokens(); };
@@ -340,7 +358,6 @@
             const container = document.getElementById('boardContainer');
             const trash = document.getElementById('trashZone');
             const rect = container.getBoundingClientRect();
-            
             trash.classList.add('active');
 
             const move = (me) => {
@@ -354,24 +371,16 @@
                 window.removeEventListener('mousemove', move);
                 window.removeEventListener('touchmove', move);
                 trash.classList.remove('active');
-
                 const clientY = se.changedTouches ? se.changedTouches[0].clientY : se.clientY;
                 const clientX = se.changedTouches ? se.changedTouches[0].clientX : se.clientX;
                 const trashRect = trash.getBoundingClientRect();
 
-                if (clientX >= trashRect.left && clientX <= trashRect.right &&
-                    clientY >= trashRect.top && clientY <= trashRect.bottom) {
-                    
-                    // Trigger Sound
-                    trashSound.currentTime = 0;
-                    trashSound.play().catch(e => {});
-                    
+                if (clientX >= trashRect.left && clientX <= trashRect.right && clientY >= trashRect.top && clientY <= trashRect.bottom) {
+                    trashSound.currentTime = 0; trashSound.play().catch(e => {});
                     el.remove();
                 }
-                
                 saveCurrentTokens(); 
             };
-
             window.addEventListener('mousemove', move);
             window.addEventListener('touchmove', move);
             window.addEventListener('mouseup', stop, { once: true });
@@ -383,9 +392,7 @@
             if (currentImgIdx === undefined) return;
             const tokens = document.querySelectorAll('.token');
             partyData[currentImgIdx].tokens = Array.from(tokens).map(t => ({ 
-                leftPct: parseFloat(t.style.left), 
-                topPct: parseFloat(t.style.top),
-                pNum: t.getAttribute('data-player')
+                leftPct: parseFloat(t.style.left), topPct: parseFloat(t.style.top), pNum: t.getAttribute('data-player')
             }));
         }
 
