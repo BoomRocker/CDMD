@@ -3,7 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="CDMD Companion">
+    
     <title>CDMD Companion</title>
+
+    <link rel="icon" type="image/png" href="assets\symbol.png">
+    <link rel="apple-touch-icon" href="assets\symbol.png">
 
     <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -15,13 +22,35 @@
             overscroll-behavior-y: contain; 
         }
 
-        .main-container { display: flex; flex-direction: row; width: 100vw; height: 100vh; }
-        .app-wrapper { position: relative; flex-grow: 1; height: 100%; }
+        /* flex-direction remains row for landscape iPad, 
+           added safe area padding for the side-bar */
+        .main-container { 
+            display: flex; 
+            flex-direction: row; 
+            width: 100vw; 
+            height: 100vh; 
+        }
+
+        .app-wrapper { 
+            position: relative; 
+            flex-grow: 1; 
+            height: 100%; 
+            /* Push content away from the iPad notch/status bar if in landscape */
+            padding-top: env(safe-area-inset-top);
+        }
 
         .nav-bar {
-            display: flex; flex-direction: column; background: #0a0a0a; 
-            border-left: 2px solid #222; width: 70px; height: 100%;
-            z-index: 100; padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom);
+            display: flex; 
+            flex-direction: column; 
+            background: #0a0a0a; 
+            border-left: 2px solid #222; 
+            width: 80px; /* Slightly wider for better iPad touch targets */
+            height: 100%;
+            z-index: 100; 
+            /* Handling iPad Pro home bar and status bar margins */
+            padding-top: env(safe-area-inset-top); 
+            padding-bottom: env(safe-area-inset-bottom);
+            padding-right: env(safe-area-inset-right);
         }
 
         .nav-btn {
@@ -31,19 +60,13 @@
         }
 
         .nav-btn .material-icons { font-size: 32px; margin-bottom: 4px; }
-        .nav-btn span.label { font-family: 'MedievalSharp', cursive; font-size: 0.65em; text-transform: uppercase; }
+        .nav-btn span.label { font-family: 'MedievalSharp', cursive; font-size: 0.75em; text-transform: uppercase; }
 
         /* --- ACTIVE STATES --- */
         .btn-grid.active { color: #ffcf67; border-left-color: #ffcf67; background: linear-gradient(to right, rgba(255, 207, 103, 0.1), transparent); }
         .btn-invest.active { color: #4682B4; border-left-color: #4682B4; background: linear-gradient(to right, rgba(70, 130, 180, 0.1), transparent); }
         .btn-dice.active { color: #2ecc71; border-left-color: #2ecc71; background: linear-gradient(to right, rgba(46, 204, 113, 0.1), transparent); }
-        
-        /* NEW PURPLE MUSIC TAB */
-        .btn-music.active { 
-            color: #a29bfe; 
-            border-left-color: #a29bfe; 
-            background: linear-gradient(to right, rgba(162, 155, 254, 0.1), transparent); 
-        }
+        .btn-music.active { color: #a29bfe; border-left-color: #a29bfe; background: linear-gradient(to right, rgba(162, 155, 254, 0.1), transparent); }
 
         .app-frame {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -93,7 +116,6 @@
             buttons.forEach(btn => btn.classList.remove('active'));
             frames.forEach(frame => frame.classList.remove('active'));
 
-            // This dynamically finds btnMusic and musicFrame
             const targetBtn = document.getElementById('btn' + app.charAt(0).toUpperCase() + app.slice(1));
             const targetFrame = document.getElementById(app + 'Frame');
             
@@ -105,7 +127,6 @@
             }
         }
 
-        // Logic for message handling remains the same...
         window.addEventListener('message', function(event) {
             if (event.data.type === 'PARTY_CONFIRMED') {
                 currentParty = event.data.party;
@@ -126,6 +147,11 @@
                 });
             }
         });
+
+        // Prevents bounce scrolling on older iOS versions
+        document.addEventListener('touchmove', function(e) {
+            if (e.touches.length > 1) e.preventDefault();
+        }, { passive: false });
     </script>
 </body>
 </html>
