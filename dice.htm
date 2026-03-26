@@ -36,49 +36,7 @@
             box-sizing: border-box;
         }
 
-        /* --- NEW TOP NAV --- */
-        .top-nav-buttons {
-            display: flex;
-            width: 100%;
-            background: #111;
-            border-bottom: 1px solid #333;
-            gap: 1px;
-        }
-
-        .nav-btn {
-            padding: 12px;
-            margin: 0 0 0 10px;
-            background: #1a1a1a;
-            border: none;
-            color: #888;
-            font-family: 'MedievalSharp';
-            text-transform: uppercase;
-            cursor: pointer;
-            font-size: 0.9em;
-            letter-spacing: 1px;
-            transition: all 0.2s;
-            background: rgba(69, 90, 100, 0.25) !important;
-            backdrop-filter: blur(4px);
-            font-size: 12px;
-            padding: 0 10px;
-            color: #8b7355;
-            height: 40px;
-            cursor: pointer;
-            border-radius: 6px;
-            font-family: 'MedievalSharp';
-            background: linear-gradient(#2d4d3f, #122b21);
-            border: 2px solid #8b7355;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color:#8b7355;
-        }
-
-        .nav-btn:hover { background: #222; color: #fff; }
-        .nav-btn.active { color: var(--accent); background: #000; }
-
-        /* --- INVESTIGATOR BAR --- */
+        /* --- TOP NAV --- */
         .investigator-bar {
             display: flex; align-items: center; justify-content: space-between; width: 100%; 
             padding: 8px 12px; background: #000; border-bottom: 2px solid #333; 
@@ -98,19 +56,39 @@
             transition: all 0.3s ease; min-width: 60px; text-align: center;
         }
 
+        .nav-btn, .btn-reset {
+            height: 40px; padding: 0 12px; margin-left: 10px;
+            background: linear-gradient(#2d4d3f, #122b21);
+            border: 2px solid #8b7355; border-radius: 6px;
+            color: white; font-family: 'MedievalSharp'; font-size: 12px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; text-transform: uppercase;
+        }
+
+        .btn-reset { background: rgba(40, 20, 20, 0.9); border-color: #633; color: #a66; }
+
+		.count-number {
+			font-size: 2em;
+		}
+		
         /* --- CONTROLS --- */
         .controls {
-            display: flex; gap: 30px; margin-bottom: 20px; 
-            background: rgba(10, 10, 10, 0.85) !important;
-            padding: 12px 25px; border-radius: 60px; border: 1px solid rgba(255,255,255,0.1); 
-            box-sizing: border-box; justify-content: center; align-items: center;
-            width: 100%; max-width: 765px; align-self: center;
+            display: flex; 
+			gap: 30px; 			
+			margin: -10px 0 30px 0; 
+            background: rgba(10, 10, 10, 0.85);
+            padding: 12px 25px; 
+			border-radius: 60px; border: 1px solid rgba(255,255,255,0.1); 
+            justify-content: center; 
+			align-items: center; 
+			width: 90%; 
+			max-width: 765px; 
+			align-self: center;
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
 
         .die-counter { display: flex; align-items: center; gap: 7px; font-weight: bold; }
         .type-icon { width: 32px; height: 32px; background-size: contain; background-repeat: no-repeat; background-position: center; }
-        .die-counter span[id*="Count"] { font-size: 1.4em; min-width: 25px; text-align: center; }
         
         .btn-circle-black, .btn-circle-green { 
             width: 44px; height: 44px; border-radius: 50%; 
@@ -118,50 +96,12 @@
             cursor: pointer; font-size: 1.5em; display: flex; align-items: center; justify-content: center;
         }
         .btn-circle-black { color: gray; border-color: gray; }
-        .btn-circle-green { color: var(--bright-green); border-color:  var(--bright-green); }
-        
-        .btn-reset {
-            padding: 12px;
-            margin: 0 0 0 10px;
-            border: none;
-            color: #888;
-            font-family: 'MedievalSharp';
-            text-transform: uppercase;
-            cursor: pointer;
-            font-size: 0.9em;
-            letter-spacing: 1px;
-            transition: all 0.2s;
-            background: rgba(69, 90, 100, 0.25) !important;
-            backdrop-filter: blur(4px);
-            font-size: 12px;
-            padding: 0 10px;
-            color: #8b7355;
-            height: 40px;
-            cursor: pointer;
-            border-radius: 6px;
-            font-family: 'MedievalSharp';
-            background: linear-gradient(#2d4d3f, #122b21);
-            border: 2px solid #8b7355;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color:#8b7355;
-            background: rgba(40, 20, 20, 0.9) !important;
-            border: 2px solid #633;
-            color: #a66;
-            padding: 6px 12px;
-            border-radius: 4px;
-            font-family: 'MedievalSharp';
-            cursor: pointer;
-            white-space: nowrap;
-
-        }
+        .btn-circle-green { color: var(--bright-green); border-color: var(--bright-green); }
 
         #resetBtn { 
             width: 40px; height: 40px; background: #111; color: var(--border-gold); 
             border: 2px solid var(--border-gold); border-radius: 4px; cursor: pointer;
-            margin: 0 40px 0 40px;
+            margin: 0 40px;
         }
 
         /* --- TRAY & PORTRAIT --- */
@@ -170,95 +110,71 @@
             align-items: stretch; margin-bottom: 25px;
         }
 
-.char-portrait {
-    width: 150px;
-    height: auto;
+        .char-portrait {
+	width: 150px;
+    height: 300px;
     aspect-ratio: 1;
-    border: 5px solid var(--border-gold);
+    border: 7px solid var(--border-gold);
     border-radius: 15px;
     background-color: #111;
     flex-shrink: 0;
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
-    background-size: cover;
+    background-size: 500%;
     background-repeat: no-repeat;
+    background-position: 24% 38%;
     position: relative;
     overflow: hidden;
-
-    /* REPOSITION HERE */
-    /* First value is Left/Right, second is Up/Down */
-    background-position: 24% 38%; 
-	background-size: 500%;
-}
-
-        .char-portrait::after {
-            content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 45%;
-            background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%);
-            pointer-events: none;
+    margin-top: 30px;
         }
-        
+
         .dice-tray {
-            flex-grow: 1;
-            border: 14px solid #2a1a10;
+            flex-grow: 1; border: 14px solid #2a1a10;
             border-image: url('assets/dice/wood.jpg') 45 round;
-            border-radius: 0;
+            
+            /* ADDED OUTLINE FOR COLOR CHANGE */
+            outline: 7px solid transparent;
+            outline-offset: 0px;
+            transition: outline-color 0.3s ease;
+			border-radius: 10px;
+
             background-color: var(--dark-felt); 
-            background-image: 
-                radial-gradient(circle at center, rgba(0,0,0,0) 0%, rgba(10,10,10,0.9) 100%),
-                url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E"),
-                url('https://www.transparenttextures.com/patterns/natural-paper.png');
-            background-blend-mode: multiply, overlay, multiply;
-            background-size: auto, 150px 150px, 500px 500px;
-            box-shadow: 
-                0 15px 45px rgba(0,0,0,0.9),
-                inset 0 20px 40px rgba(0,0,0,0.8), 
-                inset 0 -2px 2px rgba(255,255,255,0.15),
-                inset 10px 0 20px rgba(0,0,0,0.5),
-                inset -10px 0 20px rgba(0,0,0,0.5);
-            padding: 25px; 
-            min-height: 300px;
-            display: flex; 
-            flex-direction: column; 
-            box-sizing: border-box;
-            position: relative;
-
+            background-image: radial-gradient(circle at center, rgba(0,0,0,0) 0%, rgba(10,10,10,0.9) 100%), url('https://www.transparenttextures.com/patterns/natural-paper.png');
+            background-blend-mode: multiply; padding: 25px; min-height: 300px;
+            display: flex; flex-direction: column; position: relative;
         }
 
-        .dice-grid {
-            display: flex; flex-wrap: wrap; justify-content: center;
-            align-content: center; gap: 25px; flex-grow: 1;
-        }
+        .dice-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 25px; flex-grow: 1; }
 
-        .die-scene { width: 82px; height: 82px; perspective: 600px; cursor: pointer; position: relative; transition: transform 0.2s; }
-        .die-scene.held { transform: scale(1.08); }
+        /* --- DICE CSS --- */
+        .die-scene { width: 82px; height: 82px; perspective: 600px; cursor: pointer; position: relative; }
         .die-scene.held .cube-face { border: 2px solid #fff; box-shadow: 0 0 20px rgba(255, 255, 255, 0.3); filter: brightness(1.2); }
-
         .cube { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 0.7s cubic-bezier(0.17, 0.67, 0.83, 0.67); }
-        .cube-face { position: absolute; width: 82px; height: 82px; border-radius: 18px; background-size: contain; background-repeat: no-repeat; background-position: center; background-origin: content-box; padding: 18px; box-sizing: border-box; backface-visibility: hidden; }
+        .cube-face { position: absolute; width: 82px; height: 82px; border-radius: 18px; background-size: contain; background-repeat: no-repeat; background-position: center; padding: 18px; box-sizing: border-box; backface-visibility: hidden; }
+        .black .cube-face { background-color: #222; border: 1px solid #777; }
+        .green .cube-face { background-color: #1a3c2a; border: 1.5px solid rgba(255,255,255,0.12); }
 
-        .black .cube-face { background-color: #222; background-image: radial-gradient(circle at 35% 35%, #2a2a2a 0%, #000 100%); border: 1px solid #777; }
-        .green .cube-face { background-color: #1a3c2a; background-image: radial-gradient(circle at 35% 35%, var(--bright-green) 0%, #0a1811 100%); border: 1.5px solid rgba(255,255,255,0.12); }
-
-        .front  { transform: rotateY(0deg) translateZ(41px); }
-        .back   { transform: rotateY(180deg) translateZ(41px); }
-        .right  { transform: rotateY(90deg) translateZ(41px); }
-        .left   { transform: rotateY(-90deg) translateZ(41px); }
-        .top    { transform: rotateX(90deg) translateZ(41px); }
+        .front { transform: rotateY(0deg) translateZ(41px); }
+        .back  { transform: rotateY(180deg) translateZ(41px); }
+        .right { transform: rotateY(90deg) translateZ(41px); }
+        .left  { transform: rotateY(-90deg) translateZ(41px); }
+        .top   { transform: rotateX(90deg) translateZ(41px); }
         .bottom { transform: rotateX(-90deg) translateZ(41px); }
-
         .rolling { animation: tumble 0.7s linear infinite; }
         @keyframes tumble { 0% { transform: rotateX(0deg) rotateY(0deg); } 100% { transform: rotateX(360deg) rotateY(360deg); } }
 
+        /* --- ACTION AREA --- */
         .action-area {
-            display: flex; flex-direction: row; align-items: center; justify-content: space-between; 
-            gap: 15px; width: 95%; max-width: 900px;
+            display: flex; flex-direction: column; align-items: center;
+            width: 95%; max-width: 900px; gap: 15px;
         }
+
+        .main-roll-row { display: flex; width: 100%; gap: 15px; align-items: center; }
 
         #rollBtn {
             flex: 1; height: 85px; background: linear-gradient(#2d4d3f, #122b21);
             border: 2px solid var(--border-gold); border-radius: 4px; cursor: pointer; 
             display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
-
         .rollBtn-text { font-family: 'MedievalSharp'; font-size: 22px; color: var(--accent); }
 
         .report {
@@ -267,26 +183,37 @@
             border-radius: 12px; border: 1px solid #333;
         }
         .report > div { display: flex; flex-direction: column; align-items: center; }
-        .report-label-row { display: flex; align-items: center; gap: 6px; font-size: 0.95em; margin-bottom: 2px; }
+        .report-label-row { display: flex; align-items: center; gap: 6px; font-size: 0.95em; }
         .report-icon { width: 24px; height: 24px; }
         .report-icon img { width: 100%; height: 100%; object-fit: contain; }
         .report span[id*="res"] { font-weight: bold; font-size: 2.8em; line-height: 1; }
         
-        .succ img { filter: sepia(1) saturate(5) hue-rotate(90deg); } 
-        .elde img { filter: sepia(1) saturate(5) hue-rotate(-15deg); } 
         .report-label-row.succ, span#resSuccess { color: var(--succ-color); }
         .report-label-row.tent, span#resTentacle { color: var(--tent-color); }
         .report-label-row.elde, span#resElder { color: var(--elde-color); }
 
-        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(0, 0, 0, .5); border-top: 1px solid #333; display: flex; justify-content: center; padding: 15px 0; backdrop-filter: blur(10px); }
+        /* --- NAV BUTTONS ROW --- */
+        .nav-controls-row {
+            display: flex; gap: 12px; width: 100%; justify-content: center;
+        }
+
+        .nav-btn-secondary {
+            flex: 1; height: 55px; background: rgba(30, 30, 30, 0.9);
+            border: 1px solid var(--border-gold); border-radius: 6px;
+            color: var(--border-gold); font-family: 'MedievalSharp';
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            cursor: pointer; text-transform: uppercase; font-size: 14px;
+        }
+
+        .nav-btn-secondary:active { background: var(--border-gold); color: black; }
 
         @media (max-width: 650px) {
             .tray-layout { flex-direction: column; align-items: center; }
             .char-portrait { width: 80px; }
-            .controls { gap: 10px; padding: 8px 15px; }
+            .main-roll-row { flex-direction: column-reverse; }
         }
-        
-        .die-scene { width: 82px; height: 82px; perspective: 600px; cursor: pointer; position: relative; transition: transform 0.2s; }
+		
+		.die-scene { width: 82px; height: 82px; perspective: 600px; cursor: pointer; position: relative; transition: transform 0.2s; }
         .die-scene::after { content: ''; position: absolute; bottom: -8px; left: 10%; width: 80%; height: 15px; background: rgba(0,0,0,0.6); filter: blur(8px); border-radius: 50%; z-index: -1; }
         .die-scene.held { transform: scale(1.08); }
         .die-scene.held .cube-face { border: 2px solid #fff; box-shadow: 0 0 20px rgba(255, 255, 255, 0.3), inset 0 0 15px rgba(255, 207, 103, 0.6); filter: brightness(1.2); }
@@ -319,76 +246,81 @@
 <body>
 
 <div class="investigator-bar">
-
     <div class="tab-wrapper" id="diceCharBar">
-        <p style="color: #444; font-family: 'MedievalSharp'; margin-left: 10px;">Waiting for Party...</p>
+        <p style="color: #444; font-family: 'MedievalSharp'; margin-left: 10px;">Waiting for Party...</p><button class="nav-btn" onclick="openInvestigators()"><span class="material-symbols-outlined" style="margin-right:8px;">groups</span> Investigators</button>
     </div>
-    
-    <button class="nav-btn" onclick="openInvestigators()"><span class="material-symbols-outlined" style="margin-right:8px;">groups</span> Investigators</button>
-    <button class="nav-btn" onclick="location.reload()"><span class="material-symbols-outlined" style="margin-right:8px;">photo</span>Smart Roll</button>
-    <button class="nav-btn" onclick="initQuickRoll()"><span class="material-symbols-outlined" style="margin-right:8px;">casino</span> Quick Roll Mode</button>
-    <button class="btn-reset" onclick="location.reload()"><span class="material-symbols-outlined" style="margin-right:8px;">autorenew</span>Reload Page</button>
 
+    <button class="btn-reset" onclick="location.reload()"><span class="material-symbols-outlined" style="margin-right:8px;">autorenew</span> Reload</button>
 </div>
 
 <div class="tray-layout">
     <div class="char-portrait" id="charPortrait"></div>
-    
     <div class="dice-tray" id="trayBackground">
         <div class="controls">
             <div class="die-counter">
                 <div class="type-icon" style="background-image: url('assets/dice/icon-black-dice.png');"></div>
                 <button class="btn-circle-black" onclick="updateCount('black', -1)">−</button>
-                <span id="blackCount" style="color: gray;">3</span>
+                <span id="blackCount" class="count-number" style="color: gray;">3</span>
                 <button class="btn-circle-black" onclick="updateCount('black', 1)">+</button>
             </div>
-            <button id="resetBtn" onclick="resetActiveChar()"><span class="material-symbols-outlined" style="margin-right:8px;">reset_focus</span></button>
+            <button id="resetBtn" onclick="resetActiveChar()"><span class="material-symbols-outlined">reset_focus</span></button>
             <div class="die-counter">
                 <div class="type-icon" style="background-image: url('assets/dice/icon-green-dice.png');"></div>
                 <button class="btn-circle-green" onclick="updateCount('green', -1)">−</button>
-                <span id="greenCount" style="color: #2ecc71;">0</span>
+                <span id="greenCount" class="count-number" style="color: #2ecc71;">0</span>
                 <button class="btn-circle-green" onclick="updateCount('green', 1)">+</button>
             </div>
         </div>
-
         <div class="dice-grid" id="diceContainer"></div>
     </div>
 </div>
 
 <div class="action-area">
-    <div class="report">
-        <div class="elde">
-            <div class="report-label-row elde">
-                <div class="report-icon"><img src="assets/dice/elder-white.svg"></div>
-                <span>ELDER</span>
+    <div class="main-roll-row">
+        <div class="report">
+            <div class="elde">
+                <div class="report-label-row elde">
+                    <div class="report-icon"><img src="assets/dice/elder-white.svg"></div>
+                    <span>ELDER</span>
+                </div>
+                <span id="resElder">0</span>
             </div>
-            <span id="resElder">0</span>
-        </div>
-        <div class="tent">
-            <div class="report-label-row tent">
-                <div class="report-icon"><img src="assets/dice/tentacle-white.svg"></div>
-                <span>INSANITY</span>
+            <div class="tent">
+                <div class="report-label-row tent">
+                    <div class="report-icon"><img src="assets/dice/tentacle-white.svg"></div>
+                    <span>INSANITY</span>
+                </div>
+                <span id="resTentacle">0</span>
             </div>
-            <span id="resTentacle">0</span>
-        </div>
-        <div class="succ">
-            <div class="report-label-row succ">
-                <div class="report-icon"><img src="assets/dice/success-white.svg"></div>
-                <span>SUCCESS</span>
+            <div class="succ">
+                <div class="report-label-row succ">
+                    <div class="report-icon"><img src="assets/dice/success-white.svg"></div>
+                    <span>SUCCESS</span>
+                </div>
+                <span id="resSuccess">0</span>
             </div>
-            <span id="resSuccess">0</span>
         </div>
+
+        <button id="rollBtn" onclick="rollAll()">
+            <div style="display: flex; gap: 8px; align-items: center;">
+                <img src="assets/dice/icon-black-dice.png" style="width:30px;">
+                <img src="assets/dice/icon-green-dice.png" id="greenRollIcon" style="width:30px; display: none;">
+                <span class="rollBtn-text">Roll Dice</span>
+            </div>
+        </button>
     </div>
 
-    <button id="rollBtn" onclick="rollAll()">
-        <div style="display: flex; gap: 8px; align-items: center;">
-            <img src="assets/dice/icon-black-dice.png" style="width:30px;">
-            <img src="assets/dice/icon-green-dice.png" id="greenRollIcon" style="width:30px; display: none;">
-            <span class="rollBtn-text">Roll Dice</span>
-        </div>
-    </button>
+    <div class="nav-controls-row">
+        <button class="nav-btn-secondary" onclick="changeInvestigator(-1)">
+            <span class="material-symbols-outlined">chevron_left</span>
+            <span>Prev Investigator</span>
+        </button>
+        <button class="nav-btn-secondary" onclick="changeInvestigator(1)">
+            <span>Next Investigator</span>
+            <span class="material-symbols-outlined">chevron_right</span>
+        </button>
+    </div>
 </div>
-
 
 <script>
     let investigators = [];
@@ -408,26 +340,22 @@
     const greenPool = ['eldeSuccess', 'elder', 'success', 'blank', 'success', 'blank'];
     const rotations = ['rotateY(0deg)', 'rotateY(180deg)', 'rotateY(-90deg)', 'rotateY(90deg)', 'rotateX(-90deg)', 'rotateX(90deg)'];
 
-function openInvestigators() {
-    window.parent.postMessage({ type: 'SWITCH_APP', app: 'invest' }, '*');
-}
+    function openInvestigators() {
+        window.parent.postMessage({ type: 'SWITCH_APP', app: 'invest' }, '*');
+    }
 
-    function initQuickRoll() {
-        const quickParty = [
-            { id: null, color: '#e74c3c' }, // Red
-            { id: null, color: '#3498db' }, // Blue
-            { id: null, color: '#2ecc71' }, // Green
-            { id: null, color: '#f1c40f' }, // Yellow
-            { id: null, color: '#9b59b6' }, // Purple
-            { id: null, color: '#e67e22' }  // Orange
-        ];
-        buildDiceTabs(quickParty, 0);
+    function changeInvestigator(direction) {
+        if (!investigators || investigators.length === 0) return;
+        activeIdx += direction;
+        if (activeIdx < 0) activeIdx = investigators.length - 1;
+        if (activeIdx >= investigators.length) activeIdx = 0;
+        applyDiceUIState(activeIdx);
+        window.parent.postMessage({ type: 'TAB_SHIFT', index: activeIdx }, '*');
     }
 
     function selectChar(i) {
-        if (!investigators[i]) return;
-        window.parent.postMessage({ type: 'TAB_SHIFT', index: i }, '*');
         applyDiceUIState(i);
+        window.parent.postMessage({ type: 'TAB_SHIFT', index: i }, '*');
     }
 
     function applyDiceUIState(i) {
@@ -446,12 +374,13 @@ function openInvestigators() {
             portrait.style.backgroundImage = 'none';
             portrait.style.backgroundColor = activeColor;
         }
-        
         portrait.style.borderColor = activeColor;
-        portrait.style.color = activeColor; 
 
+        // --- UPDATED: Apply color to outline instead of border ---
         const tray = document.getElementById('trayBackground');
-        if (tray) tray.style.backgroundColor = 'var(--dark-felt)';
+        if (tray) {
+            tray.style.outlineColor = activeColor;
+        }
 
         const greenIcon = document.getElementById('greenRollIcon');
         if (greenIcon) greenIcon.style.display = char.green > 0 ? 'block' : 'none';
@@ -459,14 +388,10 @@ function openInvestigators() {
         document.querySelectorAll('.char-tab').forEach((b, idx) => {
             if (idx === i) {
                 b.style.background = activeColor;
-                b.style.borderColor = "#fff";
-                b.style.color = "#fff";
-                b.style.boxShadow = `0 0 15px ${activeColor}aa`;
+                b.style.borderColor = "#fff"; b.style.color = "#fff";
             } else {
                 b.style.background = "#111";
-                b.style.borderColor = "#444";
-                b.style.color = "#666";
-                b.style.boxShadow = "none";
+                b.style.borderColor = "#444"; b.style.color = "#666";
             }
         });
         renderDice();
@@ -475,7 +400,6 @@ function openInvestigators() {
     function updateCount(type, delta) {
         const char = investigators[activeIdx];
         if (!char) return;
-        
         char[type] = Math.max(0, Math.min(10, char[type] + delta));
         
         const totalDice = char.black + char.green;
@@ -487,18 +411,14 @@ function openInvestigators() {
             char.results.pop();
             char.held.pop();
         }
-
         document.getElementById(type + 'Count').innerText = char[type];
-        const greenIcon = document.getElementById('greenRollIcon');
-        if (greenIcon) greenIcon.style.display = char.green > 0 ? 'block' : 'none';
-        renderDice();
+        applyDiceUIState(activeIdx);
     }
 
     function resetActiveChar() {
         const char = investigators[activeIdx];
-        char.black = 3;
-        char.green = 0;
-        char.results = Array(3).fill(null).map(() => ({ type: 'blank', index: 5 }));
+        char.black = 3; char.green = 0;
+        char.results = Array(3).fill({ type: 'blank', index: 5 });
         char.held = Array(3).fill(false);
         applyDiceUIState(activeIdx);
     }
@@ -507,20 +427,17 @@ function openInvestigators() {
         const container = document.getElementById('diceContainer');
         const char = investigators[activeIdx];
         if (!char) return;
-
         container.innerHTML = '';
         let dieCount = 0;
 
         ['black', 'green'].forEach(color => {
             const pool = color === 'black' ? blackPool : greenPool;
-            const count = char[color];
-            
-            for(let i=0; i<count; i++) {
+            for(let i=0; i<char[color]; i++) {
                 const currentDieIdx = dieCount;
                 const dieState = char.results[currentDieIdx] || { type: 'blank', index: 5 };
                 const isHeld = char.held[currentDieIdx];
                 
-                const dieHtml = `
+                container.insertAdjacentHTML('beforeend', `
                     <div class="die-scene ${color} ${isHeld ? 'held' : ''}" onclick="toggleHold(this, ${currentDieIdx})" data-id="${currentDieIdx}">
                         <div class="cube" style="transform: ${rotations[dieState.index]}">
                             <div class="cube-face front" style="background-image: url('assets/dice/${faceFiles[pool[0]]}')"></div>
@@ -530,8 +447,7 @@ function openInvestigators() {
                             <div class="cube-face top" style="background-image: url('assets/dice/${faceFiles[pool[4]]}')"></div>
                             <div class="cube-face bottom" style="background-image: url('assets/dice/${faceFiles[pool[5]]}')"></div>
                         </div>
-                    </div>`;
-                container.insertAdjacentHTML('beforeend', dieHtml);
+                    </div>`);
                 dieCount++;
             }
         });
@@ -546,15 +462,12 @@ function openInvestigators() {
         scenes.forEach(scene => {
             const id = parseInt(scene.dataset.id);
             if (char.held[id]) return;
-
             rollingAny = true;
             const cube = scene.querySelector('.cube');
             cube.classList.add('rolling');
             
-            const isBlack = scene.classList.contains('black');
-            const pool = isBlack ? blackPool : greenPool;
+            const pool = scene.classList.contains('black') ? blackPool : greenPool;
             const resultIdx = Math.floor(Math.random() * 6);
-            
             char.results[id] = { type: pool[resultIdx], index: resultIdx };
 
             setTimeout(() => {
@@ -563,25 +476,18 @@ function openInvestigators() {
                 updateReport();
             }, 700);
         });
-        
-        if (rollingAny) { 
-            rollSound.currentTime = 0; 
-            rollSound.play().catch(()=>{}); 
-        }
+        if (rollingAny) { rollSound.currentTime = 0; rollSound.play().catch(()=>{}); }
     }
 
     function updateReport() {
         const char = investigators[activeIdx];
-        if (!char) return;
-
         let s = 0, t = 0, e = 0;
         char.results.forEach(res => {
-            const type = res.type;
-            if (type === 'success') s++;
-            if (type === 'tentacle') t++;
-            if (type === 'elder') e++;
-            if (type === 'both') { s++; t++; }
-            if (type === 'eldeSuccess') { s++; e++; } 
+            if (res.type === 'success') s++;
+            if (res.type === 'tentacle') t++;
+            if (res.type === 'elder') e++;
+            if (res.type === 'both') { s++; t++; }
+            if (res.type === 'eldeSuccess') { s++; e++; } 
         });
         document.getElementById('resSuccess').innerText = s;
         document.getElementById('resTentacle').innerText = t;
@@ -589,8 +495,7 @@ function openInvestigators() {
     }
 
     function toggleHold(el, id) { 
-        const char = investigators[activeIdx];
-        char.held[id] = !char.held[id];
+        investigators[activeIdx].held[id] = !investigators[activeIdx].held[id];
         el.classList.toggle('held'); 
     }
 
@@ -603,27 +508,21 @@ function openInvestigators() {
 
     function buildDiceTabs(partyItems, savedIndex = 0) {
         const container = document.getElementById('diceCharBar');
-        if (!container) return;
         container.innerHTML = ''; 
-        
         investigators = partyItems.map((item, idx) => {
             const existing = investigators[idx];
-            const bCount = existing ? existing.black : 3;
-            const gCount = existing ? existing.green : 0;
             return {
-                id: (item.id !== undefined) ? item.id : null,
+                id: item.id ?? null,
                 color: item.color || '#1a3c2a',
-                black: bCount,
-                green: gCount,
-                results: (existing && existing.results) ? existing.results : Array(bCount + gCount).fill(null).map(() => ({ type: 'blank', index: 5 })),
-                held: (existing && existing.held) ? existing.held : Array(bCount + gCount).fill(false)
+                black: existing?.black ?? 3,
+                green: existing?.green ?? 0,
+                results: existing?.results ?? Array(3).fill({ type: 'blank', index: 5 }),
+                held: existing?.held ?? Array(3).fill(false)
             };
         });
-
         investigators.forEach((char, index) => {
             const btn = document.createElement('button');
-            btn.className = 'char-tab';
-            btn.innerText = `P${index + 1}`; 
+            btn.className = 'char-tab'; btn.innerText = `P${index + 1}`; 
             btn.onclick = () => selectChar(index);
             container.appendChild(btn);
         });
