@@ -6,6 +6,7 @@
     <title>CDMD: Investigators</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Caudex:wght@400;700&family=MedievalSharp&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
     
     <style>
         :root { --accent: #4682B4; --gold: #c5a059; }
@@ -22,134 +23,142 @@
             padding: 20px; overflow-y: auto;
         }
 
-        .setup-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-            max-width: 1200px;
-            margin: 0 auto 5px auto;
-        }
+        .setup-header { display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 1200px; margin: 0 auto 5px auto; }
+        .setup-title { font-family: 'MedievalSharp'; color: var(--accent); margin: 0; font-size: 1.8em; flex-grow: 1; }
+        .start-btn { padding: 12px 30px; font-family: 'MedievalSharp'; background: #1a3c4a; color: white; border: 1px solid var(--accent); border-radius: 4px; cursor: pointer; font-size: 1.1em; transition: all 0.2s; min-width: 220px; }
 
-        .setup-title {
-            font-family: 'MedievalSharp'; 
-            color: var(--accent); 
-            margin: 0;
-            font-size: 1.8em;
-            flex-grow: 1;
-        }
-
-        .start-btn {
-            padding: 12px 30px; 
-            font-family: 'MedievalSharp';
-            background: #1a3c4a; 
-            color: white; 
-            border: 1px solid var(--accent);
-            border-radius: 4px; 
-            cursor: pointer; 
-            font-size: 1.1em;
-            transition: all 0.2s;
-            min-width: 220px;
-        }
-        .start-btn:active { background: var(--accent); transform: scale(0.98); }
-
-        .gallery {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-            gap: 12px; width: 100%; max-width: 1200px; margin: 10px auto;
-        }
-
-        /* --- THUMBNAIL & SELECTION STYLES --- */
+        .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px; width: 100%; max-width: 1200px; margin: 10px auto; }
         .thumb-container { position: relative; display: flex; flex-direction: column; align-items: center; }
-        
-        .thumb {
-            width: 100%; aspect-ratio: 1; 
-            border: 2px solid #333; 
-            border-radius: 8px;
-            background-size: cover; background-position: center; cursor: pointer; 
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-sizing: border-box;
-            opacity: 0.6; /* Faded by default */
-        }
+        .thumb { width: 100%; aspect-ratio: 1; border: 5px solid #333; border-radius: 8px; background-size: cover; background-position: center; cursor: pointer; transition: all 0.3s; opacity: 0.6; }
+        .thumb.selected { border-width: 5px; opacity: 1; z-index: 10; box-shadow: inset 0 0 0 2px rgba(255,255,255,0.9), 0 0 20px rgba(0,0,0,0.5); }
 
-        /* The "Obvious" Selection State */
-        .thumb.selected {
-            border-width: 5px;
-            opacity: 1;
-            transform: scale(1.05);
-            z-index: 10;
-            /* Inset creates the white inner ring for contrast */
-            box-shadow: inset 0 0 0 2px rgba(255,255,255,0.9), 0 0 20px rgba(0,0,0,0.5);
-        }
+        .player-badge { position: absolute; top: -5px; right: -5px; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'MedievalSharp'; font-size: 0.8em; font-weight: bold; color: white; border: 2px solid white; z-index: 20; box-shadow: 0 2px 5px rgba(0,0,0,0.5); pointer-events: none; }
 
-        .player-badge {
-            position: absolute;
-            top: -5px; right: -5px;
-            width: 28px; height: 28px;
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-family: 'MedievalSharp';
-            font-size: 0.8em;
-            font-weight: bold;
-            color: white;
-            border: 2px solid white;
-            z-index: 20;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
-            pointer-events: none;
-        }
-
-        #previewOverlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000;
-            display: none; justify-content: center; align-items: center; pointer-events: none;
-        }
-        #previewOverlay img { max-width: 90%; max-height: 90%; border: 3px solid var(--gold); border-radius: 10px; }
+        #previewOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 2000; display: none; justify-content: center; align-items: center; cursor: pointer; }
+        #previewOverlay img { max-width: 95%; max-height: 95%; border: 3px solid var(--gold); border-radius: 10px; pointer-events: none; }
 
         /* --- IN-GAME UI --- */
-        .investigator-bar {
-            display: flex; align-items: center; justify-content: space-between;
-            width: 100%; padding: 8px 12px; background: #000; 
-            border-bottom: 2px solid #333; box-sizing: border-box; 
-            flex-shrink: 0; height: 60px;
-        }
-
+        .investigator-bar { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 8px 12px; background: #000; border-bottom: 2px solid #333; height: 60px; box-sizing: border-box; }
         .tab-wrapper { display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; flex-grow: 1; }
-        .tab-wrapper::-webkit-scrollbar { display: none; }
+        .char-tab { padding: 10px 20px; background: #111; border: 1px solid #444; border-radius: 4px; color: #666; font-family: 'MedievalSharp'; cursor: pointer; transition: all 0.3s; }
 
-        .char-tab {
-            padding: 10px 20px; background: #111; border: 1px solid #444; 
-            border-radius: 4px; color: #666; font-family: 'MedievalSharp'; 
-            cursor: pointer; white-space: nowrap; font-size: 1em;
-            transition: all 0.3s ease;
+        .header-actions { display: flex; align-items: center; gap: 8px; position: relative; }
+        
+        #trashZone { 
+            margin: 0 0 0 10px;
+            height: 37px !important;
+            padding: 0px 12px;
+            border-radius: 4px;
+            font-family: 'MedievalSharp';
+            background: rgba(40, 20, 20, 0.9) !important;
+            border: 2px dashed #633;
+            color: #a66;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            white-space: nowrap;
+            font-size: 12px;
+            text-transform: uppercase;
+
+        }
+            
+        #addItemMenu {
+            position: absolute; top: 110%; right: 0; background: #1a1a1a; border: 1px solid var(--gold);
+            border-radius: 8px; display: none; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 10px;
+            z-index: 1000; box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        }
+        .add-thumb { width: 45px; height: 45px; border-radius: 4px; border: 1px solid #444; cursor: pointer; background-size: contain; background-repeat: no-repeat; background-position: center; }
+
+        #boardContainer { position: relative; flex-grow: 1; width: 100vw; background-repeat: no-repeat; background-position: center center; background-size: contain; touch-action: none; overflow: hidden; }
+
+        .token { 
+            position: absolute; width: 85px; height: 85px; cursor: move; z-index: 100; 
+            touch-action: none; background-size: contain; background-repeat: no-repeat; 
+            background-position: center; transform: translate(-50%, -50%); 
         }
 
-        .header-actions { display: flex; align-items: center; gap: 8px; }
-
-        .btn-reset { 
-            background: rgba(40, 20, 20, 0.9); border: 1px solid #633; color: #a66; 
-            padding: 6px 12px; border-radius: 4px; font-family: 'MedievalSharp'; 
-            cursor: pointer; white-space: nowrap; font-size: 0.8em;
+        .phobia-card {
+            position: absolute; 
+            width: 310px; 
+            height: 520px;
+            background-image: url('assets/investigators/phobia.png');
+            background-size: 3707px 1578px; 
+            border: 5px solid var(--gold); 
+            border-radius: 30px;
+            z-index: 400; 
+            cursor: move; 
+            touch-action: none;
+            display: none;
+            box-shadow: 0 10px 40px rgba(0,0,0,1);
+            transform: scale(0.85);
+            transform-origin: top left;
+        }
+        
+        .btn-action {
+            margin: 0 0 0 0;
+            height: 40px;
+            padding: 0 10px;
+            border-radius: 6px;
+            font-family: 'MedievalSharp';
+            background: linear-gradient(#2d4d3f, #122b21) !important;
+            border: 2px solid #8b7355;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 12px;
+            text-transform: uppercase;
+			color: #8b7355;
+        }
+        
+        .btn-reset {
+            margin: 0 0 0 10px;
+            height: 40px;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-family: 'MedievalSharp';
+            background: rgba(40, 20, 20, 0.9) !important;
+            border: 2px solid #633;
+            color: #a66;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            white-space: nowrap;
+            font-size: 12px;
+            text-transform: uppercase;
         }
 
-        #trashZone {
-            width: 80px; height: 34px; background: rgba(139, 26, 26, 0.2);
-            border: 1px dashed rgba(255, 255, 255, 0.3); border-radius: 4px;
-            display: flex; justify-content: center; align-items: center;
-            color: rgba(255, 255, 255, 0.4); font-family: 'MedievalSharp';
-            font-size: 0.7em; text-align: center; pointer-events: none;
-            transition: all 0.3s ease;
-        }
-        #trashZone.active { background: #8b1a1a; border-color: #fff; color: #fff; transform: scale(1.1); }
-
-        #boardContainer {
-            position: relative; flex-grow: 1; width: 100vw;
-            background-repeat: no-repeat; background-position: center center;
-            background-size: contain; touch-action: none;
-        }
-
-        .token {
-            position: absolute; width: 88px; height: 88px; cursor: move; z-index: 100;
-            touch-action: none; background-size: contain; background-repeat: no-repeat;
-            background-position: center; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.8));
-            transform: translate(-50%, -50%);
+        .btn-phobia {
+			padding: 12px;
+            margin: 0 0 0 10px;
+            background: #1a1a1a;
+            border: none;
+            color: #888;
+            font-family: 'MedievalSharp';
+            text-transform: uppercase;
+            cursor: pointer;
+            font-size: 0.9em;
+            letter-spacing: 1px;
+            transition: all 0.2s;
+            background: rgba(69, 90, 100, 0.25) !important;
+            backdrop-filter: blur(4px);
+            font-size: 12px;
+            padding: 0 10px;
+            color: #8b7355;
+            height: 40px;
+            cursor: pointer;
+            border-radius: 6px;
+            font-family: 'MedievalSharp';
+            background: linear-gradient(#2d4d3f, #122b21);
+            border: 2px solid #8b7355;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color:#8b7355;
         }
     </style>
 </head>
@@ -160,226 +169,254 @@
             <h1 class="setup-title">Select Investigators</h1>
             <button class="start-btn" onclick="startGame()">Begin Investigation</button>
         </div>
-        <p style="color: #666; font-style: italic; margin: 0 0 15px 0; width: 100%; max-width: 1200px; align-self: center;">
-            Tap to select • Hold to preview board
-        </p>
-        
+        <p style="color: #666; font-style: italic; margin-bottom: 10px;">Tap to select • Double-tap to preview card</p>
         <div class="gallery" id="gallery"></div>
     </div>
 
-    <div id="previewOverlay"><img id="previewImg" src=""></div>
+    <div id="previewOverlay" onclick="this.style.display='none'"><img id="previewImg" src=""></div>
 
     <div class="investigator-bar">
         <div class="tab-wrapper" id="charBar"></div>
+        <button class="btn-reset btn-phobia" onclick="togglePhobia()"><span class="material-symbols-outlined">psychology</span> &nbsp;Phobia</button>
+        <button class="btn-reset" onclick="confirmReset()"><span class="material-symbols-outlined">group</span> &nbsp;New Party</button>
         <div class="header-actions">
-            <div id="trashZone">TRASH</div>
-            <button class="btn-reset" onclick="confirmReset()">Reset Party</button>
+            <div id="trashZone"><span class="material-symbols-outlined">delete</span> Delete</div>
+            <div id="addItemMenu"></div>
+            <button class="btn-action" onclick="toggleAddMenu()"><span class="material-symbols-outlined">add_circle</span> &nbsp; Add Token</button>
         </div>
     </div>
 
-    <div id="boardContainer" onmousedown="handleBoardClick(event)" ontouchstart="handleBoardClick(event)"></div>
+    <div id="boardContainer">
+        <div id="phobiaCard" class="phobia-card"></div>
+    </div>
 
     <script>
         const totalImages = 29;
         let selectedIndices = [];
         let activeMemberIdx = 0;
         let partyData = {}; 
-        let previewTimer;
-        
         const trashSound = new Audio('assets/trash.mp3');
 
-        const STARTING_POSITIONS = [
-            { x: 4.5,  y: 8.5 }, { x: 7.5,  y: 77.5 }, { x: 7.5,  y: 89.5 },
-            { x: 57.5, y: 33.5 }, { x: 57.5, y: 62.5 }, { x: 57.5, y: 88.5 }
-        ];
-
-        const investigatorThemes = [
-            { hex: '#8b1a1a' }, { hex: '#1a4a35' }, { hex: '#1a335a' }, 
-            { hex: '#7a5a1a' }, { hex: '#4a1a5a' }, { hex: '#2c3e50' }
-        ];
-
-        const gallery = document.getElementById('gallery');
-        const overlay = document.getElementById('previewOverlay');
-        const pImg = document.getElementById('previewImg');
-
-        // Build Gallery
-        for (let i = 0; i < totalImages; i++) {
-            const container = document.createElement('div');
-            container.className = 'thumb-container';
-            container.id = `cont-${i}`;
-
-            const div = document.createElement('div');
-            div.className = 'thumb';
-            div.id = `thumb-${i}`;
-            div.style.backgroundImage = `url('assets/investigators/investigator (${i}).jpg')`;
-            
-            const showPreview = () => { pImg.src = `assets/investigators/investigator (${i}).jpg`; overlay.style.display = 'flex'; };
-            const hidePreview = () => { overlay.style.display = 'none'; };
-
-            div.onmousedown = () => { previewTimer = setTimeout(showPreview, 500); };
-            div.onmouseup = () => { clearTimeout(previewTimer); hidePreview(); };
-            div.ontouchstart = () => { previewTimer = setTimeout(showPreview, 500); };
-            div.ontouchend = () => { clearTimeout(previewTimer); hidePreview(); };
-            div.onclick = () => { toggleSelection(i); };
-
-            container.appendChild(div);
-            gallery.appendChild(container);
-        }
-
-        function toggleSelection(idx) {
-            const existingIdx = selectedIndices.indexOf(idx);
-            if (existingIdx > -1) {
-                selectedIndices.splice(existingIdx, 1);
-            } else if (selectedIndices.length < 6) {
-                selectedIndices.push(idx);
+        // PHOBIA GRID LOGIC
+        const phobiaPool = [];
+        for(let r=0; r<3; r++){
+            for(let c=0; c<11; c++){
+                if (r === 2 && c === 0) continue; 
+                if (r === 2 && c > 9) continue; 
+                phobiaPool.push({r, c});
             }
-            refreshGalleryHighlights();
         }
 
-        function refreshGalleryHighlights() {
-            // Reset all
-            document.querySelectorAll('.thumb').forEach(t => {
-                t.classList.remove('selected');
-                t.style.borderColor = "#333";
-                t.style.boxShadow = "none";
+		const START_POS = [
+			// --- LEFT SIDE TRACKS (Sanity & Health) ---
+			{ x: 4.5,  y: 12.5  }, // 1. Top-Left: Sanity Track Start
+			{ x: 7.5,  y: 73.5 }, // 2. Bottom-Left: Health Track (Upper Tier)
+			{ x: 7.5,  y: 82.5 }, // 3. Bottom-Left: Health Track (Lower Tier)
+
+			// --- RIGHT SIDE TRACKS (Skills) ---
+			{ x: 57.5, y: 35.5 }, // 4. Top Skill Row (Unique Character Skill)
+			{ x: 57.5, y: 58.5 }, // 5. Middle Skill Row
+			{ x: 57.5, y: 82.5 }  // 6. Bottom Skill Row
+		];
+
+        const themes = [ {hex:'#8b1a1a'}, {hex:'#1a4a35'}, {hex:'#1a335a'}, {hex:'#7a5a1a'}, {hex:'#4a1a5a'}, {hex:'#2c3e50'} ];
+
+        const gal = document.getElementById('gallery');
+        for (let i = 0; i < totalImages; i++) {
+            const c = document.createElement('div');
+            c.className = 'thumb-container';
+            const d = document.createElement('div');
+            d.className = 'thumb';
+            d.id = `thumb-${i}`;
+            d.style.backgroundImage = `url('assets/investigators/investigator (${i}).jpg')`;
+            
+            let lastTap = 0;
+            d.addEventListener('click', (e) => {
+                const now = Date.now();
+                const diff = now - lastTap;
+                if (diff < 300 && diff > 0) {
+                    const overlay = document.getElementById('previewOverlay');
+                    const img = document.getElementById('previewImg');
+                    img.src = `assets/investigators/investigator (${i}).jpg`;
+                    overlay.style.display = 'flex';
+                } else {
+                    const idx = selectedIndices.indexOf(i);
+                    if (idx > -1) selectedIndices.splice(idx, 1);
+                    else if (selectedIndices.length < 6) selectedIndices.push(i);
+                    refreshGal();
+                }
+                lastTap = now;
             });
+            c.appendChild(d);
+            gal.appendChild(c);
+        }
+
+        function refreshGal() {
+            document.querySelectorAll('.thumb').forEach(t => { t.classList.remove('selected'); t.style.borderColor = "#333"; });
             document.querySelectorAll('.player-badge').forEach(b => b.remove());
-
-            // Apply to selected
-            selectedIndices.forEach((imgIdx, orderIdx) => {
-                const thumb = document.getElementById(`thumb-${imgIdx}`);
-                const container = document.getElementById(`cont-${imgIdx}`);
-                const theme = investigatorThemes[orderIdx % investigatorThemes.length];
-                
-                thumb.classList.add('selected');
-                thumb.style.borderColor = theme.hex;
-                // Add outer glow with the theme color
-                thumb.style.boxShadow = `inset 0 0 0 2px rgba(255,255,255,0.9), 0 0 20px ${theme.hex}aa`;
-
-                // Add Badge
-                const badge = document.createElement('div');
-                badge.className = 'player-badge';
-                badge.innerText = `P${orderIdx + 1}`;
-                badge.style.backgroundColor = theme.hex;
-                container.appendChild(badge);
+            selectedIndices.forEach((imgIdx, i) => {
+                const t = document.getElementById(`thumb-${imgIdx}`);
+                const theme = themes[i % themes.length];
+                t.classList.add('selected');
+                t.style.borderColor = theme.hex;
+                const b = document.createElement('div');
+                b.className = 'player-badge';
+                b.innerText = `P${i+1}`;
+                b.style.backgroundColor = theme.hex;
+                t.parentNode.appendChild(b);
             });
         }
 
         function startGame() {
-            if (selectedIndices.length === 0) return alert("Select your party first.");
-            trashSound.play().then(() => { trashSound.pause(); trashSound.currentTime = 0; }).catch(e => {});
+            if (selectedIndices.length === 0) return;
+            const shuffledPool = [...phobiaPool].sort(() => Math.random() - 0.5);
             document.getElementById('setupScreen').style.display = 'none';
-            
             selectedIndices.forEach((idx, i) => {
-                const theme = investigatorThemes[i % investigatorThemes.length];
-                partyData[idx] = { tokens: [], color: theme.hex, playerNum: i + 1 }; 
-                STARTING_POSITIONS.forEach(pos => {
-                    partyData[idx].tokens.push({ leftPct: pos.x, topPct: pos.y, pNum: i + 1 });
+                partyData[idx] = { 
+                    tokens: [], 
+                    color: themes[i % themes.length].hex, 
+                    pNum: i + 1,
+                    phobia: shuffledPool[i],
+                    phobiaVisible: false,
+                    phobiaPos: {x: 40, y: 30}
+                }; 
+                START_POS.forEach(pos => {
+                    partyData[idx].tokens.push({ x: pos.x, y: pos.y, src: `assets/investigators/p${i + 1}.png` });
                 });
             });
 
-            window.parent.postMessage({ 
-                type: 'PARTY_CONFIRMED', 
-                party: selectedIndices.map(idx => ({ id: idx, color: partyData[idx].color })) 
-            }, '*');
+            if(window.parent) {
+                window.parent.postMessage({ 
+                    type: 'PARTY_CONFIRMED', 
+                    party: selectedIndices.map(idx => ({ id: idx, color: partyData[idx].color })) 
+                }, '*');
+            }
 
-            applyUIState();
+            applyUI();
         }
 
-        function confirmReset() {
-            if (confirm("Reset session? This clears all party data.")) { location.reload(); }
+        function togglePhobia() {
+            const id = selectedIndices[activeMemberIdx];
+            partyData[id].phobiaVisible = !partyData[id].phobiaVisible;
+            renderPhobia();
         }
 
-        function selectMember(arrayIdx) {
-            if (arrayIdx === activeMemberIdx) return;
-            saveCurrentTokens();
-            activeMemberIdx = arrayIdx;
-            window.parent.postMessage({ type: 'TAB_SHIFT', index: arrayIdx }, '*');
-            applyUIState();
+        function renderPhobia() {
+            const card = document.getElementById('phobiaCard');
+            const id = selectedIndices[activeMemberIdx];
+            const data = partyData[id];
+            if (data && data.phobiaVisible) {
+                const stepX = 337;
+                const stepY = 526;
+                card.style.backgroundPosition = `-${data.phobia.c * stepX}px -${data.phobia.r * stepY}px`;
+                card.style.left = data.phobiaPos.x + '%';
+                card.style.top = data.phobiaPos.y + '%';
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
         }
 
-        function applyUIState() {
-            const imgIdx = selectedIndices[activeMemberIdx];
-            if (imgIdx === undefined) return;
-            document.getElementById('boardContainer').style.backgroundImage = `url('assets/investigators/investigator (${imgIdx}).jpg')`;
-            renderTabs();
-            loadTokens(imgIdx);
+function toggleAddMenu() {
+            const m = document.getElementById('addItemMenu');
+            if (m.style.display !== 'grid') {
+                const p = partyData[selectedIndices[activeMemberIdx]].pNum;
+                m.innerHTML = '';
+                // Added 'assets/investigators/stressed.png' and 'assets/investigators/confused.png' to the array below
+                const items = [
+                    `assets/investigators/p${p}.png`, 
+                    'assets/investigators/bonus (1).jpg', 
+                    'assets/investigators/bonus (2).jpg', 
+                    'assets/investigators/bonus (3).jpg', 
+                    'assets/investigators/bonus (4).jpg', 
+                    'assets/investigators/bonus (5).jpg', 
+                    'assets/investigators/bonus (6).jpg', 
+                    'assets/investigators/fire.png',
+                    'assets/investigators/stressed.png',
+					'assets/investigators/symb.png',
+					'assets/investigators/skull.png',
+					'assets/investigators/heart.png',
+					'assets/investigators/tent.png',
+                    'assets/investigators/confused.png'
+                ];
+                items.forEach(path => {
+                    const d = document.createElement('div');
+                    d.className = 'add-thumb';
+                    d.style.backgroundImage = `url('${path}')`;
+                    d.onclick = () => { createToken(50, 50, path); m.style.display = 'none'; };
+                    m.appendChild(d);
+                });
+                m.style.display = 'grid';
+            } else m.style.display = 'none';
         }
 
-        function renderTabs() {
-            const bar = document.getElementById('charBar');
-            bar.innerHTML = '';
-            selectedIndices.forEach((imgIdx, arrayIdx) => {
-                const btn = document.createElement('button');
-                const isSelected = arrayIdx === activeMemberIdx;
-                const myColor = partyData[imgIdx].color;
-                btn.className = `char-tab`;
-                btn.innerText = `P${arrayIdx + 1}`;
-                if (isSelected) {
-                    btn.style.background = myColor;
-                    btn.style.borderColor = "#fff";
-                    btn.style.color = "#fff";
-                    btn.style.boxShadow = `0 0 15px ${myColor}aa`;
+        function createToken(x, y, src) {
+            const t = document.createElement('div');
+            t.className = 'token';
+            t.style.backgroundImage = `url('${src}')`;
+            t.dataset.src = src;
+            t.style.left = x + '%'; t.style.top = y + '%';
+            t.onmousedown = (e) => drag(e, t);
+            t.ontouchstart = (e) => drag(e, t);
+            let lastTokenTap = 0;
+            const del = () => {
+                const now = Date.now();
+                if (now - lastTokenTap < 300) {
+                    trashSound.currentTime = 0; trashSound.play().catch(()=>{});
+                    t.remove(); save();
                 }
-                btn.onclick = (e) => { e.stopPropagation(); selectMember(arrayIdx); };
-                bar.appendChild(btn);
-            });
+                lastTokenTap = now;
+            };
+            t.onclick = del;
+            t.ontouchend = del;
+            document.getElementById('boardContainer').appendChild(t);
+            save();
         }
 
-        function handleBoardClick(e) {
-            if (e.target.classList.contains('token')) return;
-            const container = document.getElementById('boardContainer');
-            const rect = container.getBoundingClientRect();
-            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-            const xPct = ((clientX - rect.left) / rect.width) * 100;
-            const yPct = ((clientY - rect.top) / rect.height) * 100;
-            createToken(xPct, yPct, null, true);
-        }
+        const pCard = document.getElementById('phobiaCard');
+        pCard.onmousedown = (e) => drag(e, pCard, true);
+        pCard.ontouchstart = (e) => drag(e, pCard, true);
 
-        function createToken(x, y, pNumOverride = null, isPct = true) {
-            const currentImgIdx = selectedIndices[activeMemberIdx];
-            if (currentImgIdx === undefined) return;
-            const pNum = pNumOverride || partyData[currentImgIdx].playerNum;
-            const token = document.createElement('div');
-            token.className = 'token';
-            token.setAttribute('data-player', pNum);
-            token.style.backgroundImage = `url('assets/investigators/p${pNum}.png')`;
-            token.style.left = isPct ? x + '%' : x + 'px';
-            token.style.top = isPct ? y + '%' : y + 'px';
-            token.onmousedown = (e) => startDrag(e, token);
-            token.ontouchstart = (e) => startDrag(e, token);
-            token.oncontextmenu = (e) => { e.preventDefault(); token.remove(); saveCurrentTokens(); };
-            document.getElementById('boardContainer').appendChild(token);
-        }
+        // DOUBLE-TAP TO DISAPPEAR PHOBIA
+        let lastPhobiaTap = 0;
+        const closePhobia = () => {
+            const now = Date.now();
+            if (now - lastPhobiaTap < 300) {
+                const id = selectedIndices[activeMemberIdx];
+                partyData[id].phobiaVisible = false;
+                renderPhobia();
+            }
+            lastPhobiaTap = now;
+        };
+        pCard.onclick = closePhobia;
+        pCard.ontouchend = closePhobia;
 
-        function startDrag(e, el) {
-            e.preventDefault(); e.stopPropagation();
+        function drag(e, el, isPhobia = false) {
+            e.preventDefault();
             const container = document.getElementById('boardContainer');
             const trash = document.getElementById('trashZone');
             const rect = container.getBoundingClientRect();
-            trash.classList.add('active');
-
             const move = (me) => {
                 const cx = me.touches ? me.touches[0].clientX : me.clientX;
                 const cy = me.touches ? me.touches[0].clientY : me.clientY;
-                el.style.left = (((cx - rect.left) / rect.width) * 100) + '%';
-                el.style.top = (((cy - rect.top) / rect.height) * 100) + '%';
+                const px = (((cx - rect.left) / rect.width) * 100);
+                const py = (((cy - rect.top) / rect.height) * 100);
+                el.style.left = px + '%';
+                el.style.top = py + '%';
+                if(isPhobia) partyData[selectedIndices[activeMemberIdx]].phobiaPos = {x:px, y:py};
             };
-
             const stop = (se) => {
                 window.removeEventListener('mousemove', move);
                 window.removeEventListener('touchmove', move);
-                trash.classList.remove('active');
-                const clientY = se.changedTouches ? se.changedTouches[0].clientY : se.clientY;
-                const clientX = se.changedTouches ? se.changedTouches[0].clientX : se.clientX;
-                const trashRect = trash.getBoundingClientRect();
-
-                if (clientX >= trashRect.left && clientX <= trashRect.right && clientY >= trashRect.top && clientY <= trashRect.bottom) {
-                    trashSound.currentTime = 0; trashSound.play().catch(e => {});
-                    el.remove();
+                if(!isPhobia) {
+                    const cx = se.changedTouches ? se.changedTouches[0].clientX : se.clientX;
+                    const cy = se.changedTouches ? se.changedTouches[0].clientY : se.clientY;
+                    const tr = trash.getBoundingClientRect();
+                    if (cx >= tr.left && cx <= tr.right && cy >= tr.top && cy <= tr.bottom) {
+                        trashSound.play().catch(()=>{}); el.remove();
+                    }
                 }
-                saveCurrentTokens(); 
+                save(); 
             };
             window.addEventListener('mousemove', move);
             window.addEventListener('touchmove', move);
@@ -387,28 +424,49 @@
             window.addEventListener('touchend', stop, { once: true });
         }
 
-        function saveCurrentTokens() {
-            const currentImgIdx = selectedIndices[activeMemberIdx];
-            if (currentImgIdx === undefined) return;
-            const tokens = document.querySelectorAll('.token');
-            partyData[currentImgIdx].tokens = Array.from(tokens).map(t => ({ 
-                leftPct: parseFloat(t.style.left), topPct: parseFloat(t.style.top), pNum: t.getAttribute('data-player')
+        function save() {
+            const id = selectedIndices[activeMemberIdx];
+            if (id === undefined) return;
+            partyData[id].tokens = Array.from(document.querySelectorAll('.token')).map(t => ({ 
+                x: parseFloat(t.style.left), y: parseFloat(t.style.top), src: t.dataset.src 
             }));
         }
 
-        function loadTokens(imgIdx) {
+        function applyUI() {
+            const id = selectedIndices[activeMemberIdx];
+            document.getElementById('boardContainer').style.backgroundImage = `url('assets/investigators/investigator (${id}).jpg')`;
+            renderTabs();
             document.querySelectorAll('.token').forEach(t => t.remove());
-            const saved = partyData[imgIdx].tokens || [];
-            saved.forEach(pos => createToken(pos.leftPct, pos.topPct, pos.pNum, true));
+            (partyData[id].tokens || []).forEach(t => createToken(t.x, t.y, t.src));
+            renderPhobia();
         }
 
-        window.addEventListener('message', function(event) {
-            if (event.data.type === 'SET_ACTIVE_TAB') {
-                if (activeMemberIdx !== event.data.index) {
-                    saveCurrentTokens();
-                    activeMemberIdx = event.data.index;
-                    applyUIState();
+        function renderTabs() {
+            const bar = document.getElementById('charBar');
+            bar.innerHTML = '';
+            selectedIndices.forEach((id, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'char-tab';
+                btn.innerText = `P${i + 1}`;
+                if (i === activeMemberIdx) {
+                    btn.style.background = partyData[id].color;
+                    btn.style.color = "#fff";
                 }
+                btn.onclick = () => { 
+                    save(); 
+                    activeMemberIdx = i; 
+                    applyUI(); 
+                    if(window.parent) window.parent.postMessage({ type: 'TAB_SHIFT', index: i }, '*');
+                };
+                bar.appendChild(btn);
+            });
+        }
+
+        function confirmReset() { if (confirm("Reset?")) location.reload(); }
+
+        window.addEventListener('message', (e) => {
+            if (e.data.type === 'SET_ACTIVE_TAB') {
+                save(); activeMemberIdx = e.data.index; applyUI();
             }
         });
     </script>

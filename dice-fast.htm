@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>CDMD: Dice Roller</title>
+    
+    <link rel="icon" type="image/png" href="assets/dice/icon-green-dice.png">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Caudex:wght@400;700&family=MedievalSharp&display=swap" rel="stylesheet">
+    
+    <style>
+        :root { 
+            --accent: #ffcf67; 
+            --bright-green: #2ecc71; 
+            --succ-color: #27ae60; 
+            --tent-color: #e74c3c; 
+            --elde-color: #ffcf67; 
+            --border-gold: #8b7355;
+        }
+        
+        body {
+            background-color: #000;
+            background: linear-gradient(rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.85)), url('assets/bg.jpg');
+            background-size: cover;
+            color: #e0e0e0;
+            font-family: 'Caudex', serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0 0 120px 0;
+            box-sizing: border-box;
+        }
+
+        /* --- TOP BAR --- */
+        .investigator-bar {
+            display: flex; align-items: center; justify-content: center; width: 100%; 
+            padding: 8px 12px; background: #000; border-bottom: 2px solid #333; 
+            box-sizing: border-box; flex-shrink: 0; height: 60px; margin-bottom: 20px;
+        }
+
+        .tab-wrapper { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; justify-content: center; }
+        .tab-wrapper::-webkit-scrollbar { display: none; }
+
+        .char-tab {
+            padding: 10px 18px; background: #111; border: 1px solid #444; 
+            border-radius: 4px; color: #666; font-family: 'MedievalSharp'; 
+            cursor: pointer; white-space: nowrap; font-size: 0.9em;
+            transition: all 0.3s ease; min-width: 55px; text-align: center;
+        }
+
+        /* --- CONTROLS --- */
+        .controls {
+            display: flex; gap: 30px; margin-bottom: 20px; 
+            background: rgba(10, 10, 10, 0.85) !important;
+            padding: 12px 25px; border-radius: 60px; border: 1px solid rgba(255,255,255,0.1); 
+            box-sizing: border-box; justify-content: center; align-items: center;
+            width: 100%; max-width: 765px; align-self: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+
+        .die-counter { display: flex; align-items: center; gap: 7px; font-weight: bold; }
+        .type-icon { width: 32px; height: 32px; background-size: contain; background-repeat: no-repeat; background-position: center; }
+        .die-counter span[id*="Count"] { font-size: 1.4em; min-width: 25px; text-align: center; }
+        
+        .btn-circle-black, .btn-circle-green { 
+            width: 40px; height: 40px; border-radius: 50%; 
+            border: 2px solid #333; background: rgba(0,0,0,0.3); 
+            cursor: pointer; font-size: 1.5em; display: flex; align-items: center; justify-content: center;
+        }
+        .btn-circle-black { color: gray; }
+        .btn-circle-green { color: var(--bright-green); }
+
+        #resetBtn { 
+            width: 40px; height: 40px; background: #111; color: var(--border-gold); 
+            border: 2px solid var(--border-gold); border-radius: 4px; cursor: pointer;
+            margin: 0 30px;
+        }
+
+        /* --- TRAY --- */
+        .tray-layout {
+            display: flex; width: 95%; max-width: 900px; gap: 15px;
+            align-items: stretch; margin-bottom: 25px;
+        }
+
+        .dice-tray {
+            flex-grow: 1;
+            border: 14px solid #2a1a10;
+            border-image: url('assets/dice/wood.jpg') 45 round;
+            border-radius: 28px;
+            background-color: #1a3c2a; 
+            background-image: 
+                radial-gradient(circle at center, rgba(0,0,0,0) 0%, rgba(10,10,10,0.9) 100%),
+                url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E"),
+                url('https://www.transparenttextures.com/patterns/natural-paper.png');
+            background-blend-mode: multiply, overlay, multiply;
+            background-size: auto, 150px 150px, 500px 500px;
+            box-shadow: 0 15px 45px rgba(0,0,0,0.9), inset 0 20px 40px rgba(0,0,0,0.8);
+            padding: 25px; 
+            min-height: 320px;
+            display: flex; 
+            flex-direction: column; 
+            box-sizing: border-box;
+            transition: background-color 0.4s ease;
+            position: relative;
+        }
+
+        .dice-grid {
+            display: flex; flex-wrap: wrap; justify-content: center;
+            align-content: center; gap: 20px; flex-grow: 1;
+        }
+
+        /* --- DICE VISUALS --- */
+        .die-scene { width: 80px; height: 80px; perspective: 600px; cursor: pointer; position: relative; transition: transform 0.2s; }
+        .die-scene::after { content: ''; position: absolute; bottom: -8px; left: 10%; width: 80%; height: 12px; background: rgba(0,0,0,0.5); filter: blur(6px); border-radius: 50%; z-index: -1; }
+        .die-scene.held { transform: scale(1.1); }
+        .die-scene.held .cube-face { border: 2px solid #fff; box-shadow: 0 0 15px rgba(255, 255, 255, 0.4); }
+
+        .cube { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 0.7s cubic-bezier(0.17, 0.67, 0.83, 0.67); }
+        .cube-face { position: absolute; width: 80px; height: 80px; border-radius: 16px; background-size: contain; background-repeat: no-repeat; background-position: center; background-origin: content-box; padding: 18px; box-sizing: border-box; backface-visibility: hidden; }
+
+        .black .cube-face { background-color: #222; background-image: radial-gradient(circle at 35% 35%, #333 0%, #000 100%); border: 1px solid #555; }
+        .green .cube-face { background-color: #1a3c2a; background-image: radial-gradient(circle at 35% 35%, #2ecc71 0%, #0a1811 100%); border: 1px solid rgba(255,255,255,0.1); }
+
+        .front  { transform: rotateY(0deg) translateZ(40px); }
+        .back   { transform: rotateY(180deg) translateZ(40px); }
+        .right  { transform: rotateY(90deg) translateZ(40px); }
+        .left   { transform: rotateY(-90deg) translateZ(40px); }
+        .top    { transform: rotateX(90deg) translateZ(40px); }
+        .bottom { transform: rotateX(-90deg) translateZ(40px); }
+
+        .rolling { animation: tumble 0.7s linear infinite; }
+        @keyframes tumble { 0% { transform: rotateX(0deg) rotateY(0deg); } 100% { transform: rotateX(360deg) rotateY(360deg); } }
+
+        /* --- ACTION AREA --- */
+        .action-area {
+            display: flex; flex-direction: row; align-items: center; justify-content: space-between; 
+            gap: 15px; width: 95%; max-width: 900px;
+        }
+
+        #rollBtn {
+            flex: 1; height: 85px; background: linear-gradient(#2d4d3f, #122b21);
+            border: 2px solid var(--border-gold); border-radius: 4px; cursor: pointer; 
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .rollBtn-text { font-family: 'MedievalSharp'; font-size: 24px; color: var(--accent); margin-left: 12px; }
+
+        .report {
+            flex: 0 0 auto; display: flex; gap: 25px; font-family: 'MedievalSharp'; text-transform: uppercase; 
+            background: rgba(15, 15, 15, 0.9); padding: 10px 25px;
+            border-radius: 12px; border: 1px solid #333;
+        }
+        .report > div { display: flex; flex-direction: column; align-items: center; }
+        .report-label-row { display: flex; align-items: center; gap: 6px; font-size: 0.9em; margin-bottom: 2px; }
+        .report-icon { width: 22px; height: 22px; }
+        .report-icon img { width: 100%; height: 100%; object-fit: contain; }
+        .report span[id*="res"] { font-weight: bold; font-size: 2.6em; line-height: 1; }
+        
+        .succ img { filter: sepia(1) saturate(5) hue-rotate(90deg); } 
+        .elde img { filter: sepia(1) saturate(5) hue-rotate(-15deg); } 
+        .report-label-row.succ, span#resSuccess { color: var(--succ-color); }
+        .report-label-row.tent, span#resTentacle { color: var(--tent-color); }
+        .report-label-row.elde, span#resElder { color: var(--elde-color); }
+
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(0, 0, 0, .6); border-top: 1px solid #333; display: flex; justify-content: center; padding: 15px 0; backdrop-filter: blur(8px); }
+
+        @media (max-width: 650px) {
+            .tray-layout { flex-direction: column; align-items: center; }
+            .controls { gap: 15px; padding: 8px 15px; }
+            .report { gap: 15px; padding: 10px 15px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="investigator-bar">
+    <div class="tab-wrapper" id="diceCharBar"></div>
+</div>
+
+<div class="tray-layout">
+    <div class="dice-tray" id="trayBackground">
+        <div class="controls">
+            <div class="die-counter">
+                <div class="type-icon" style="background-image: url('assets/dice/icon-black-dice.png');"></div>
+                <button class="btn-circle-black" onclick="updateCount('black', -1)">−</button>
+                <span id="blackCount" style="color: gray;">3</span>
+                <button class="btn-circle-black" onclick="updateCount('black', 1)">+</button>
+            </div>
+            <button id="resetBtn" onclick="resetActiveChar()">↺</button>
+            <div class="die-counter">
+                <div class="type-icon" style="background-image: url('assets/dice/icon-green-dice.png');"></div>
+                <button class="btn-circle-green" onclick="updateCount('green', -1)">−</button>
+                <span id="greenCount" style="color: #2ecc71;">0</span>
+                <button class="btn-circle-green" onclick="updateCount('green', 1)">+</button>
+            </div>
+        </div>
+
+        <div class="dice-grid" id="diceContainer"></div>
+    </div>
+</div>
+
+<div class="action-area">
+    <div class="report">
+        <div class="elde">
+            <div class="report-label-row elde">
+                <div class="report-icon"><img src="assets/dice/elder-white.svg"></div>
+                <span>ELDER</span>
+            </div>
+            <span id="resElder">0</span>
+        </div>
+        <div class="tent">
+            <div class="report-label-row tent">
+                <div class="report-icon"><img src="assets/dice/tentacle-white.svg"></div>
+                <span>INSANITY</span>
+            </div>
+            <span id="resTentacle">0</span>
+        </div>
+        <div class="succ">
+            <div class="report-label-row succ">
+                <div class="report-icon"><img src="assets/dice/success-white.svg"></div>
+                <span>SUCCESS</span>
+            </div>
+            <span id="resSuccess">0</span>
+        </div>
+    </div>
+
+    <button id="rollBtn" onclick="rollAll()">
+        <img src="assets/dice/icon-black-dice.png" style="width:34px;">
+        <img src="assets/dice/icon-green-dice.png" id="greenRollIcon" style="width:34px; display: none; margin-left: 5px;">
+        <span class="rollBtn-text">Roll Dice</span>
+    </button>
+</div>
+
+<div class="bottom-nav">
+    <div onclick="location.reload()" style="color:#888; font-family:'MedievalSharp'; cursor:pointer; text-transform:uppercase; font-size: 0.8em; letter-spacing: 1px;">Reset Board</div>
+</div>
+
+<script>
+    // HARDCODED STARTUP DATA (Matching Investigators.htm themes)
+    const investigators = [
+        { name: 'P1', color: '#8b1a1a', black: 3, green: 0 },
+        { name: 'P2', color: '#1a4a35', black: 3, green: 0 },
+        { name: 'P3', color: '#1a335a', black: 3, green: 0 },
+        { name: 'P4', color: '#7a5a1a', black: 3, green: 0 },
+        { name: 'P5', color: '#4a1a5a', black: 3, green: 0 },
+        { name: 'P6', color: '#2c3e50', black: 3, green: 0 }
+    ];
+
+    let activeIdx = 0;
+    let results = []; 
+    const rollSound = new Audio('assets/dice.mp3');
+
+    const faceFiles = { 
+        success: 'success-white.svg', 
+        tentacle: 'tentacle-white.svg', 
+        both: 'success-tentacle-white.svg', 
+        elder: 'elder-white.svg', 
+        eldeSuccess: 'success-elder-white.svg',
+        blank: '' 
+    };
+    
+    const blackPool = ['both', 'elder', 'success', 'success', 'tentacle', 'blank'];
+    const greenPool = ['eldeSuccess', 'elder', 'success', 'blank', 'success', 'blank'];
+
+    function init() {
+        const container = document.getElementById('diceCharBar');
+        investigators.forEach((char, i) => {
+            const btn = document.createElement('button');
+            btn.className = 'char-tab';
+            btn.innerText = char.name;
+            btn.onclick = () => selectChar(i);
+            container.appendChild(btn);
+        });
+        applyUI(0);
+    }
+
+    function selectChar(i) {
+        applyUI(i);
+        // Silent post for parent if listening, but not required
+        window.parent.postMessage({ type: 'TAB_SHIFT', index: i }, '*');
+    }
+
+    function applyUI(i) {
+        activeIdx = i;
+        const char = investigators[i];
+        
+        document.getElementById('blackCount').innerText = char.black;
+        document.getElementById('greenCount').innerText = char.green;
+        document.getElementById('trayBackground').style.backgroundColor = char.color;
+        document.getElementById('greenRollIcon').style.display = char.green > 0 ? 'block' : 'none';
+        
+        document.querySelectorAll('.char-tab').forEach((b, idx) => {
+            if (idx === i) {
+                b.style.background = char.color;
+                b.style.borderColor = "#fff";
+                b.style.color = "#fff";
+                b.style.boxShadow = `0 0 12px ${char.color}aa`;
+            } else {
+                b.style.background = "#111";
+                b.style.borderColor = "#444";
+                b.style.color = "#666";
+                b.style.boxShadow = "none";
+            }
+        });
+        renderDice();
+    }
+
+    function updateCount(type, delta) {
+        const char = investigators[activeIdx];
+        char[type] = Math.max(0, Math.min(10, char[type] + delta));
+        document.getElementById(type + 'Count').innerText = char[type];
+        document.getElementById('greenRollIcon').style.display = char.green > 0 ? 'block' : 'none';
+        renderDice();
+    }
+
+    function resetActiveChar() {
+        investigators[activeIdx].black = 3;
+        investigators[activeIdx].green = 0;
+        applyUI(activeIdx);
+    }
+
+    function renderDice() {
+        const container = document.getElementById('diceContainer');
+        container.innerHTML = '';
+        results = []; 
+        const char = investigators[activeIdx];
+
+        ['black', 'green'].forEach(color => {
+            const pool = color === 'black' ? blackPool : greenPool;
+            const count = char[color];
+            for(let i=0; i<count; i++) {
+                const id = results.length;
+                results.push('blank'); 
+                const dieHtml = `
+                    <div class="die-scene ${color}" onclick="toggleHold(this)" data-id="${id}">
+                        <div class="cube">
+                            <div class="cube-face front" style="background-image: url('assets/dice/${faceFiles[pool[0]]}')"></div>
+                            <div class="cube-face back" style="background-image: url('assets/dice/${faceFiles[pool[1]]}')"></div>
+                            <div class="cube-face right" style="background-image: url('assets/dice/${faceFiles[pool[2]]}')"></div>
+                            <div class="cube-face left" style="background-image: url('assets/dice/${faceFiles[pool[3]]}')"></div>
+                            <div class="cube-face top" style="background-image: url('assets/dice/${faceFiles[pool[4]]}')"></div>
+                            <div class="cube-face bottom" style="background-image: url('assets/dice/${faceFiles[pool[5]]}')"></div>
+                        </div>
+                    </div>`;
+                container.insertAdjacentHTML('beforeend', dieHtml);
+            }
+        });
+        updateReport();
+    }
+
+    function rollAll() {
+        const scenes = document.querySelectorAll('.die-scene');
+        let rollingAny = false;
+        scenes.forEach(scene => {
+            if (scene.classList.contains('held')) return;
+            rollingAny = true;
+            const cube = scene.querySelector('.cube');
+            cube.classList.add('rolling');
+            const isBlack = scene.classList.contains('black');
+            const pool = isBlack ? blackPool : greenPool;
+            const resultIdx = Math.floor(Math.random() * 6);
+            results[scene.dataset.id] = pool[resultIdx];
+            const rotations = ['rotateY(0deg)', 'rotateY(180deg)', 'rotateY(-90deg)', 'rotateY(90deg)', 'rotateX(-90deg)', 'rotateX(90deg)'];
+            setTimeout(() => {
+                cube.classList.remove('rolling');
+                cube.style.transform = rotations[resultIdx];
+                updateReport();
+            }, 700);
+        });
+        if (rollingAny) { rollSound.currentTime = 0; rollSound.play().catch(()=>{}); }
+    }
+
+    function updateReport() {
+        let s = 0, t = 0, e = 0;
+        results.forEach(res => {
+            if (res === 'success') s++;
+            if (res === 'tentacle') t++;
+            if (res === 'elder') e++;
+            if (res === 'both') { s++; t++; }
+            if (res === 'eldeSuccess') { s++; e++; } 
+        });
+        document.getElementById('resSuccess').innerText = s;
+        document.getElementById('resTentacle').innerText = t;
+        document.getElementById('resElder').innerText = e;
+    }
+
+    function toggleHold(el) { el.classList.toggle('held'); }
+
+    // Start
+    init();
+</script>
+</body>
+</html>

@@ -1,0 +1,79 @@
+/* --- DIE GEOMETRY --- */
+.die-scene { 
+    width: 82px; height: 82px; 
+    perspective: 600px; 
+}
+
+.cube { 
+    width: 100%; height: 100%; 
+    position: relative; 
+    transform-style: preserve-3d; 
+    transition: transform 0.7s cubic-bezier(0.17, 0.67, 0.83, 0.67); 
+}
+
+.cube-face { 
+    position: absolute; 
+    width: 82px; height: 82px; 
+    border-radius: 18px; 
+    background-size: contain; 
+    background-repeat: no-repeat; 
+    background-position: center; 
+    padding: 18px; 
+    box-sizing: border-box; 
+    backface-visibility: hidden; 
+}
+
+/* --- LIGHTING & SHADING --- */
+/* Black Dice: Dark gradient with a 35% offset highlight */
+.black .cube-face { 
+    background-color: #222; 
+    background-image: radial-gradient(circle at 35% 35%, #2a2a2a 0%, #000 100%); 
+    border: 1px solid #777; 
+}
+
+/* Green Dice: Brighter green highlight for a "jewel" or "plastic" look */
+.green .cube-face { 
+    background-color: #1a3c2a; 
+    background-image: radial-gradient(circle at 35% 35%, #2ecc71 0%, #0a1811 100%); 
+    border: 1.5px solid rgba(255,255,255,0.12); 
+}
+
+/* Hold State: Glow effect when selected */
+.die-scene.held .cube-face { 
+    border: 2px solid #fff; 
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.4); 
+    filter: brightness(1.2); 
+}
+.rolling { 
+    animation: tumble 0.7s linear infinite; 
+}
+
+@keyframes tumble { 
+    0% { transform: rotateX(0deg) rotateY(0deg); } 
+    100% { transform: rotateX(360deg) rotateY(360deg); } 
+}
+/* --- TRAY ARCHITECTURE --- */
+.dice-tray {
+    position: relative;
+    padding: 25px;
+    min-height: 300px;
+    border: 14px solid #2a1a10;
+    /* Use the wood texture for the frame */
+    border-image: url('assets/dice/wood.jpg') 45 round;
+    border-radius: 28px;
+    
+    /* DARK GRAY FELT LAYERS: Color + Noise + Paper Texture */
+    background-color: #222222; 
+    background-image: 
+        radial-gradient(circle at center, rgba(0,0,0,0) 0%, rgba(10,10,10,0.9) 100%),
+        url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E"),
+        url('https://www.transparenttextures.com/patterns/natural-paper.png');
+    background-blend-mode: multiply, overlay, multiply;
+    
+    /* The "Deep Dish" Inner Shadow */
+    box-shadow: 
+        0 15px 45px rgba(0,0,0,0.9),
+        inset 0 20px 40px rgba(0,0,0,0.8), 
+        inset 10px 0 20px rgba(0,0,0,0.5),
+        inset -10px 0 20px rgba(0,0,0,0.5);
+}

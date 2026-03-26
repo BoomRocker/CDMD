@@ -9,8 +9,8 @@
     
     <title>CDMD Companion</title>
 
-    <link rel="icon" type="image/png" href="assets\symbol.png">
-    <link rel="apple-touch-icon" href="assets\symbol.png">
+    <link rel="icon" type="image/png" href="assets/symbol.png">
+    <link rel="apple-touch-icon" href="assets/symbol.png">
 
     <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -22,8 +22,6 @@
             overscroll-behavior-y: contain; 
         }
 
-        /* flex-direction remains row for landscape iPad, 
-           added safe area padding for the side-bar */
         .main-container { 
             display: flex; 
             flex-direction: row; 
@@ -35,7 +33,6 @@
             position: relative; 
             flex-grow: 1; 
             height: 100%; 
-            /* Push content away from the iPad notch/status bar if in landscape */
             padding-top: env(safe-area-inset-top);
         }
 
@@ -44,10 +41,9 @@
             flex-direction: column; 
             background: #0a0a0a; 
             border-left: 2px solid #222; 
-            width: 80px; /* Slightly wider for better iPad touch targets */
+            width: 80px; 
             height: 100%;
             z-index: 100; 
-            /* Handling iPad Pro home bar and status bar margins */
             padding-top: env(safe-area-inset-top); 
             padding-bottom: env(safe-area-inset-bottom);
             padding-right: env(safe-area-inset-right);
@@ -60,12 +56,13 @@
         }
 
         .nav-btn .material-icons { font-size: 32px; margin-bottom: 4px; }
-        .nav-btn span.label { font-family: 'MedievalSharp', cursive; font-size: 0.75em; text-transform: uppercase; }
+        .nav-btn span.label { font-family: 'MedievalSharp', cursive; font-size: 0.75em; text-transform: uppercase; text-align: center; line-height: 1.1; }
 
         /* --- ACTIVE STATES --- */
         .btn-grid.active { color: #ffcf67; border-left-color: #ffcf67; background: linear-gradient(to right, rgba(255, 207, 103, 0.1), transparent); }
         .btn-invest.active { color: #4682B4; border-left-color: #4682B4; background: linear-gradient(to right, rgba(70, 130, 180, 0.1), transparent); }
         .btn-dice.active { color: #2ecc71; border-left-color: #2ecc71; background: linear-gradient(to right, rgba(46, 204, 113, 0.1), transparent); }
+        .btn-roll.active { color: #e74c3c; border-left-color: #e74c3c; background: linear-gradient(to right, rgba(231, 76, 60, 0.1), transparent); }
         .btn-music.active { color: #a29bfe; border-left-color: #a29bfe; background: linear-gradient(to right, rgba(162, 155, 254, 0.1), transparent); }
 
         .app-frame {
@@ -83,6 +80,7 @@
             <iframe src="boss-scenario.htm" id="gridFrame" class="app-frame active"></iframe>
             <iframe src="investigators.htm" id="investFrame" class="app-frame"></iframe>
             <iframe src="dice.htm" id="diceFrame" class="app-frame"></iframe>
+            <iframe src="dice-fast.htm" id="rollFrame" class="app-frame"></iframe>
             <iframe src="music.htm" id="musicFrame" class="app-frame"></iframe>
         </div>
 
@@ -93,11 +91,11 @@
             </button>
             <button id="btnInvest" class="nav-btn btn-invest" onclick="switchApp('invest')">
                 <span class="material-icons">groups</span>
-                <span class="label">Heroes</span>
+                <span class="label">Investigators</span>
             </button>
             <button id="btnDice" class="nav-btn btn-dice" onclick="switchApp('dice')">
                 <span class="material-icons">casino</span>
-                <span class="label">Dice</span>
+                <span class="label">Smart Dice</span>
             </button>
             <button id="btnMusic" class="nav-btn btn-music" onclick="switchApp('music')">
                 <span class="material-icons">library_music</span>
@@ -116,28 +114,39 @@
             buttons.forEach(btn => btn.classList.remove('active'));
             frames.forEach(frame => frame.classList.remove('active'));
 
+            // Find the button and frame
             const targetBtn = document.getElementById('btn' + app.charAt(0).toUpperCase() + app.slice(1));
             const targetFrame = document.getElementById(app + 'Frame');
             
             if (targetBtn) targetBtn.classList.add('active');
             if (targetFrame) targetFrame.classList.add('active');
 
-            if (app === 'dice' && currentParty.length > 0) {
+            // Sync party data to either dice application if switching to them
+            if ((app === 'dice' || app === 'roll') && currentParty.length > 0) {
                 targetFrame.contentWindow.postMessage({ type: 'SYNC_PARTY', party: currentParty }, '*');
             }
         }
 
         window.addEventListener('message', function(event) {
+            // FIX: This section allows internal buttons in iframes to trigger tab switches
+            if (event.data.type === 'SWITCH_APP') {
+                switchApp(event.data.app);
+            }
+
             if (event.data.type === 'PARTY_CONFIRMED') {
                 currentParty = event.data.party;
-                const diceFrame = document.getElementById('diceFrame').contentWindow;
-                diceFrame.postMessage({ type: 'SYNC_PARTY', party: currentParty }, '*');
+                ['diceFrame', 'rollFrame'].forEach(id => {
+                    const frame = document.getElementById(id);
+                    if(frame) frame.contentWindow.postMessage({ type: 'SYNC_PARTY', party: currentParty }, '*');
+                });
             }
+
             if (event.data.type === 'REQUEST_SYNC') {
                 if (currentParty.length > 0) {
                     event.source.postMessage({ type: 'SYNC_PARTY', party: currentParty }, '*');
                 }
             }
+
             if (event.data.type === 'TAB_SHIFT') {
                 const frames = document.querySelectorAll('.app-frame');
                 frames.forEach(frame => {
@@ -148,7 +157,6 @@
             }
         });
 
-        // Prevents bounce scrolling on older iOS versions
         document.addEventListener('touchmove', function(e) {
             if (e.touches.length > 1) e.preventDefault();
         }, { passive: false });
